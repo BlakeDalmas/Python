@@ -1,0 +1,300 @@
+Artwork from :
+    Open Game Art:
+        https://opengameart.org
+        https://opengameart.org/content/grass-texture-0
+        https://opengameart.org/content/old-tiles
+        https://opengameart.org/content/fortress-backgroundstoryboard-image
+        https://opengameart.org/content/fantasy-ui-button
+        https://opengameart.org/content/animated-skeleton
+        https://opengameart.org/content/pixel-village
+        https://opengameart.org/content/low-poly-rocks
+        https://opengameart.org/content/topdown-knight
+        https://opengameart.org/content/cavalry-sprite-for-freesiege
+        https://opengameart.org/content/farm
+        https://opengameart.org/content/orange-hq-building-isometric
+        https://opengameart.org/content/paint-horse
+        https://opengameart.org/content/wizard-1
+        https://opengameart.org/content/pixel-art-explosion-animation
+        https://opengameart.org/content/wwii-top-down-usaaf-bombers
+        https://opengameart.org/content/tank-sprites
+        https://opengameart.org/content/missile-0
+        https://opengameart.org/content/fossil-undead-rpg-enemy-mod-therapsid-charset
+        https://opengameart.org/content/undead-king
+        https://opengameart.org/content/lpc-medieval-fantasy-character-sprites
+        https://opengameart.org/content/gui-buttons
+        https://opengameart.org/content/animated-flame-texture
+        https://opengameart.org/content/spell-icon-collection-part-2
+        https://opengameart.org/content/lasers-and-beams
+        https://opengameart.org/content/spell-icon-collection-part-1
+        https://opengameart.org/content/spell-icon-collection-part-3
+        https://opengameart.org/content/fire-32x32
+        https://opengameart.org/content/lightning-cloud
+        https://opengameart.org/content/free-game-fx
+        https://opengameart.org/content/warning-stripes-trim-trim-medium-border-light-alt
+        https://opengameart.org/content/4-metal-plates-light-w-border
+        https://opengameart.org/content/gilgaphoenixignis-rpg-ennemy-sprite-pack
+        https://opengameart.org/content/painterly-spell-icons-part-1
+        https://opengameart.org/content/painterly-spell-icons-part-2
+        https://opengameart.org/content/painterly-spell-icons-part-3
+        https://opengameart.org/content/painterly-spell-icons-part-4
+
+    Keenney.nl:
+        http://kenney.nl
+        http://kenney.nl/assets/tower-defense-top-down
+
+    Other:
+        https://wiki.openttd.org/images/c/c9/Oil_pump.gif
+        http://sci.esa.int/science-e-media/img/80/heic0901d.jpg
+        https://cdn0.iconfinder.com/data/icons/gray-business-toolbar/512/repair-3-512.png
+        http://ak1.picdn.net/shutterstock/videos/9794771/thumb/1.jpg
+        http://www.skullspiration.com/wp-content/uploads/2017/01/Leonardo-da-vinci.jpg
+        https://i.pinimg.com/originals/de/24/c2/de24c23cad9e0fa6a0f395c122b45ab5.jpg
+        https://img0.etsystatic.com/065/1/5868601/il_340x270.794053992_2j7h.jpg
+        https://thegraphicsfairy.com/wp-content/uploads/blogger/_CarNcodpCMA/ShikPycSmDI/AAAAAAAADkc/FVMFBLQ99Lw/s1600/1askull008.jpg
+
+    Tokkoro:
+        http://www.tokkoro.com/1378725-skeleton.html
+
+* A lot of the artwork was heavily modified by me before putting it into the game.
+* Some of the artwork was drawn by me, here's a list of some of things I drew for the game:
+    - The arrows and other projectiles
+    - The lightning effects for the mage tower
+    - Most of the weapons the towers are holding
+    - Most of the GUI elements
+    - The skills in the skill menu
+    - Some of the effects for the spells
+
+Sounds From:
+    Freesound:
+        https://freesound.org/people/Eelke/sounds/266647/
+        https://freesound.org/people/Cribbler/sounds/381859/
+        https://freesound.org/people/dave.des/sounds/127196/
+        https://freesound.org/people/unfa/sounds/352143/
+        https://freesound.org/people/LiamG_SFX/sounds/334234/
+        https://freesound.org/people/LiamG_SFX/sounds/322496/
+        https://freesound.org/people/peepholecircus/sounds/169989/
+        https://freesound.org/people/kingsrow/sounds/181580/
+        https://freesound.org/people/beman87/sounds/162842/
+        https://freesound.org/people/GameAudio/sounds/220161/
+        https://freesound.org/people/digifishmusic/sounds/42190/
+        https://freesound.org/people/Littlebrojay/sounds/195439/
+        https://freesound.org/people/1piemanpie/sounds/383220/
+        https://freesound.org/people/SoundCollectah/sounds/158467/
+        https://freesound.org/people/pfranzen/sounds/187707/
+        https://freesound.org/people/worthahep88/sounds/319228/
+        https://freesound.org/people/erkanozan/sounds/51755/
+        https://freesound.org/people/isteak/sounds/387232/
+        https://freesound.org/people/suonho/sounds/27568/
+        https://freesound.org/people/MattLeschuck/sounds/394671/
+        https://freesound.org/people/LeMudCrab/sounds/163457/
+        https://freesound.org/people/ermfilm/sounds/162535/
+        https://freesound.org/people/EFlexTheSoundDesigner/sounds/398348/
+        https://freesound.org/people/AbuNijmeh/sounds/318971/
+        https://freesound.org/people/studiomandragore/sounds/401628/
+        https://freesound.org/people/unfa/sounds/352143/
+        https://freesound.org/people/Benboncan/sounds/69060/
+        https://freesound.org/people/LittleRobotSoundFactory/sounds/270543/
+        https://freesound.org/people/LittleRobotSoundFactory/sounds/270468/
+        https://freesound.org/people/Hanbaal/sounds/178872/
+        https://freesound.org/people/Bitbeast/sounds/17188/
+        https://freesound.org/people/qubodup/sounds/159725/
+        https://freesound.org/people/mad-monkey/sounds/66692/
+        https://freesound.org/people/nearsight_00/sounds/164048/
+        https://freesound.org/people/ERH/sounds/31348/
+        https://freesound.org/people/FlechaBr/sounds/340159/
+        https://freesound.org/people/RADIY/sounds/213148/
+        https://freesound.org/people/Taira%20Komori/sounds/214209/
+        https://freesound.org/people/LittleRobotSoundFactory/sounds/270403/
+        https://freesound.org/people/FunWithSound/sounds/369252/
+        https://freesound.org/people/Minecast_/sounds/167683/
+        https://freesound.org/people/sunnyflower/sounds/359139/
+        https://freesound.org/people/Ali_6868/sounds/384898/
+        https://freesound.org/people/Ali_6868/sounds/384896/
+
+    Soundbible:
+        http://soundbible.com/2095-Mossberg-500-Pump-Shotgun.html
+        http://soundbible.com/1998-Gun-Fire.html
+        http://soundbible.com/2075-RPG-Plus-Shrapnel.html
+
+    Sounds Made by Me:
+        tower_sell.ogg
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Tower Defense Game with Ages
+You start off as cavemen and you can buy rock towers and stuff however if you save up enough you can purchase the
+next age which unlocks arrow towers and stuff. So it gives the player a difficult choice: spam weaker towers or risk it
+and try to save up for the next age.
+Age 1: Stone Age (rock towers, clubs, etc)
+Age 2: Mideval Age (Arrows, Swords, Horses, etc)
+Age 3: Industrial Age (Guns, Rockets, etc)
+???? Age 4: Space Age (Lasers, Plasma, etc, last age)
+Theme: The Great Skeleton War
+Use the snake generation from my first attempted project to randomly generate levels, but it needs some modifications
+1) Rather than going from left to right it will go from left corner to right
+2) No matter what, the snake generation will always generate 100 blocks (or whatever number)
+    i. To accomplish this have it calculate how many blocks away it is from the end and if runs out it just rushes
+    the closest path to the end.
+3) The snake generation cannot go through an air block
+
+You can place towers anywhere except the air blocks (there is no grid system), however towers must at lesat a tiny
+distance away from each other
+
+Enemy Ideas:
+
+Standard Skeleton:
+Just an ordinary skeleton, weak, medium speed, nothing special, in later waves there's hundreds of these
+
+Armored Skeleton:
+Skeleton with armor, medium health, slow speed
+
+Giant Skeleton:
+Medium health, medium speed
+
+Giant Armored Skeleton:
+High health, slow speed
+
+Behemoth Skeleton:
+Super high health, super slow speed
+
+Spooky Skeleton:
+Super weak, super fast, doesn't spawn often, shiny blue color
+
+
+
+
+Tower Ideas:
+
+Traps:
+Disposable, high damage, can only be placed on path, when enemy walks over them they are destroyed, cheap.
+Stone Age (Boulder Trap): Rock falls down on anyone passing under
+Medieval Age (Spikes): Spikes in the ground
+Industrial Age (Landmine): Explodes AOE
+
+Person Tower 1:
+Good damage, medium fire rate, single target, tiny range, cheap.
+Stone Age (Club Guy): Guy with a club
+Medieval Age (Knight): Guy with a sword
+Industrial Age (Shotgun Guy): Guy with a shotgun
+
+Person Tower 2:
+Medium damage, medium fire rate, single target, medium range, cheap.
+Stone Age (Rock Thrower): Guy who throws rocks
+Medieval Age (Javelin Dude): Guy with a javelin
+Industrial Age (Machinegun Guy): Guy with a machinegun
+
+Person Tower 3:
+High damage, slow fire rate, single target, infinite range, moderate price.
+Stone Age (Blowgun Guy): Has a blowgun
+Medieval Age (Archer): Has a bow
+Industrial Age (Sniper): Has a sniper
+
+Special Tower:
+High Damage, AOE, expensive.
+Stone Age (Sentient Boulder): A boulder that appears randomly on the y axis of a random tile
+Medieval Age (Charriot): Runs in circle hurting enemies he runs through
+Industrial Age (Bomber Plane): A plane that drops bombs whenever it crosses over a path, flies in either a huge circle of figure 8 configuration.
+
+Money Tower:
+These tower do not attack enemies, rather they generate money, moderate price.
+Stone Age (Rock Mine): Guy hitting a rock
+Medieval Age (Farm): Grows corn and stuff
+Industrial Age (Oil Rig): One of those oil digging thingies
+
+Super Tower:
+High Damage, High Fire Rate, AOE, Large Range, Super Expensive.
+Stone Age (Atlatl Guy): A guy with an atlatl
+Medieval Age (Mage): Casts fire spells and stuff
+Industrial Age (Tank): It's a tank.
+
+Other ideas:
+    Standard Tower 1:
+    High damage, very slow fire rate, AOE, medium range, expensive.
+    Stone Age (Boulder Dudes): A bunch of people throwing boulders
+    Medieval Age (Catapult): It's a catapult
+    Industrial Age (Mortar Squad): shoot mortars
+
+    Standard Tower 2:
+    Low damage, high fire rate, single target, medum-low range, expensive.
+    Stone Age (Spear Squad): A bunch of people throwing spears
+    Medieval Age (Arrow Tower): A tower that fires a barrage of arrows
+    Industrial Age (Foxhole): A bunch of machineguns
+
+Snake Generation:
+Rather than have a few boring maps this game has a virtually unlimited amount of maps. They are randomly generated
+with an algorithm I created that I call "Snake Generation", basically it's like the snake game except the snake is
+calculating where to place the path, and the entire process is like a huge "would you rather" game designated by points
+and penalities. So the thinking process looks like this:
+Would I rather intersect a path, go near an adjacent block, go near the edge of the map, or go into nothing?
+    I would rather go through nothing since there's no penalty for doing that
+Would I rather go closer to the map, intersect a path, go diagonal to a path, or go diagonal to another path?
+    Go closer to map, has least amount of penalties.
+etc
+
+
+Wave Logic:
+While on the last age, the next age button is replaced with a win game button.
+The win game button will be $100,000 or some other large number
+Here's how the logic works
+Waves 1-20 or 1-50 or 1-something will be preset
+Between each wave is a 10 second intermission
+??? Make it so you can't buy during the wave and extend intermission?
+Wave one has some weak skeletons that spawn slowly
+Wave two has some more weak skeletons that spawn a little faster
+This continues until wave 5, on wave 5 armored skeletons start spawning
+Number of weak skeletons and armored skeletons increases until wave 10
+On wave 10 hyperskeletons start spawning
+These increase until wave 15
+On wave 15 raptor skeletons start spawning
+This continues until wave 20
+On wave 20 skeleton liches start spawning
+The rest of the game just keeps on gradually increases the spawn rates and the spawn chances of larger enemies
+The game ends when either the skeletons overun the player and kill the town or the player gets enough money to win
+
+Weak Skeletons:
+Just a standard skeleton, decent speed, lowish health
+
+Armored Skeleton:
+more health, slower move speed
+
+Hyperskeleton:
+Super fast, super low hp, movement speed based on number of tiles on map, low amount tiles = slow speed, high amount
+of tiles = hyperspeed. Invincible until half-way through map.
+
+Raptor Skeleton:
+High health, spawns in with slow movement speed but gradually goes faster
+
+Skeleton Lich:
+Massive health, slow speed, has a shield, moves faster when shield is depleted
+
+
+The Player:
+Now that you can't place towers during the round the user needs to be able to do something other than watch.
+They should be able to control a weak player who can run around shooting stuff, there should be three different classes
+with skill trees and stuff. To make it even cooler have it so you can only control the character during the wave, so
+it sort of "Swaps" between controlling towers and the player in the wave / wave intermission
+
+The enemies can attack the player, usually they just ignore him and run past him but sometimes they will stop and attack
+him. If the player dies they respawn at the camp after 10 seconds. Each kill (tower or player) counts towards exp, the
+player can spend exp on skill tree stuff.
+
+One Does the highest DPS but risky because he has no ranged attacks, only melee, also has super high health.
+
+One that Does meh DPS but has a ton of cool stuff like freezing or fire and stuff.
+
+One that Does decent DPS and has ranged attack but has very low health and can't get anywhere near enemies without dying.
