@@ -23,6 +23,7 @@ a large FPS drop.
 
 I've also included a console feature where you can press ~ to type in the following commands:
 quit - Exits the game
+
 win - Makes you win the game
 lose - Instantly destroys your village
 restart - Restarts the game
