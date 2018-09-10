@@ -11,9 +11,8 @@ and all that stuff. I will try to provide steps on how to do this:
 After doing all of that, you should be able to get the files for the game from this github, put it into the IDE and run it.
 I will try putting a download link on the github so you don't have to deal with git commands.
 
-The Game:
-This is a school project I made for an intro to programming class themed around video games. The game is called, "The Great Skeleton War"
-and it's a tower defence game that has three seperate ages. The Stone Age, the Medieval Age, and the Modern Age. In each age you get new
+The Great Skeleton War:
+This is a tower defence game that has three seperate ages. The Stone Age, the Medieval Age, and the Modern Age. In each age you get new
 towers that you can buy. There's a horde of skeletons coming to destroy your village and as the game progresses stronger skeletons spawn
 in higher quantities. Oh, also you're a wizard that can cast spells. You can unlock new spells or upgrade your spells by killing enemies and
 leveling up.
@@ -45,3 +44,4 @@ I've also included a console feature where you can press ~ to type in the follow
 21) game.setage - Sets the age (ex: game.setage medieval)
 22) game.spawnenemy - Spawns an enemy (ex: game.spawnenemy raptor)
 23) where the wild things are - ???
+
