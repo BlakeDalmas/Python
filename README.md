@@ -15,7 +15,7 @@ The Game:
 This is a school project I made for an intro to programming class themed around video games. The game is called, "The Great Skeleton War"
 and it's a tower defence game that has three seperate ages. The Stone Age, the Medieval Age, and the Modern Age. In each age you get new
 towers that you can buy. There's a horde of skeletons coming to destroy your village and as the game progresses stronger skeletons spawn
-in higher quantities. Oh, you're a wizard that can cast spells. You can unlock new spells or upgrade your spells by killing enemies and
+in higher quantities. Oh, also you're a wizard that can cast spells. You can unlock new spells or upgrade your spells by killing enemies and
 leveling up.
 
 Just as a fair warning, the game gets very laggy around wave 20+ because of the large amount of enemies. It will still work, just expect
