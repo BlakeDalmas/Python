@@ -2,6 +2,7 @@
 School projects in Python that use the arcade library (http://arcade.academy/)
 
 Installation:
+
 I didn't really plan on this being something you could just easily download and play, so you will have to install Python and get an IDE
 and all that stuff. I will try to provide steps on how to do this:
 1) Install python https://www.python.org/downloads/
@@ -12,6 +13,7 @@ After doing all of that, you should be able to get the files for the game from t
 I will try putting a download link on the github so you don't have to deal with git commands.
 
 The Great Skeleton War:
+
 This is a tower defence game that has three seperate ages. The Stone Age, the Medieval Age, and the Modern Age. In each age you get new
 towers that you can buy. There's a horde of skeletons coming to destroy your village and as the game progresses stronger skeletons spawn
 in higher quantities. Oh, also you're a wizard that can cast spells. You can unlock new spells or upgrade your spells by killing enemies and
