@@ -22,27 +22,26 @@ Just as a fair warning, the game gets very laggy around wave 20+ because of the 
 a large FPS drop.
 
 I've also included a console feature where you can press ~ to type in the following commands:
-quit - Exits the game
-
-win - Makes you win the game
-lose - Instantly destroys your village
-restart - Restarts the game
-restoremana - Restores your mana to the maximum value
-nextage - Sets you to the next age
-killall - Kills all enemies on the screen
-endwave - Ends the wave and clears the enemy spawning queue
-spawndata - Tells you how many enemies are left in the spawning queue
-tgm - Sets your level to 10, gives you thousands of mana, speed, population, and money.
-player.levelup - Levels up the player (ex: player.levelup for one level or player.levelup 3 for 3 levels)
-player.givespell - Gives the player the specified spell (ex: player.giveskill Inferno)
-player.giveskill - Gives the player the specified skill (ex: player.giveskill Blistering)
-player.setmana - Sets current mana (not max mana) (ex: player.setmana 50)
-player.setmaxmana - Sets max mana (ex: player.setmaxmana 100)
-player.givexp - Gives experience (ex: player.givexp 10)
-player.setspeed - Sets movement speed of player (ex: player.setspeed 10)
-game.setpopulation - Sets population of your village (ex: game.setpopulation 100)
-game.setwave - Sets current wave (ex: game.setwave 10)
-game.givemoney - Gives you money (ex: game.givemoney 100)
-game.setage - Sets the age (ex: game.setage medieval)
-game.spawnenemy - Spawns an enemy (ex: game.spawnenemy raptor)
-where the wild things are - ???
+1) quit - Exits the game
+2) win - Makes you win the game
+3) lose - Instantly destroys your village
+4) restart - Restarts the game
+5) restoremana - Restores your mana to the maximum value
+6) nextage - Sets you to the next age
+7) killall - Kills all enemies on the screen
+8) endwave - Ends the wave and clears the enemy spawning queue
+9) spawndata - Tells you how many enemies are left in the spawning queue
+10) tgm - Sets your level to 10, gives you thousands of mana, speed, population, and money.
+11) player.levelup - Levels up the player (ex: player.levelup for one level or player.levelup 3 for 3 levels)
+12) player.givespell - Gives the player the specified spell (ex: player.giveskill Inferno)
+13) player.giveskill - Gives the player the specified skill (ex: player.giveskill Blistering)
+14) player.setmana - Sets current mana (not max mana) (ex: player.setmana 50)
+15) player.setmaxmana - Sets max mana (ex: player.setmaxmana 100)
+16) player.givexp - Gives experience (ex: player.givexp 10)
+17) player.setspeed - Sets movement speed of player (ex: player.setspeed 10)
+18) game.setpopulation - Sets population of your village (ex: game.setpopulation 100)
+19) game.setwave - Sets current wave (ex: game.setwave 10)
+20) game.givemoney - Gives you money (ex: game.givemoney 100)
+21) game.setage - Sets the age (ex: game.setage medieval)
+22) game.spawnenemy - Spawns an enemy (ex: game.spawnenemy raptor)
+23) where the wild things are - ???
