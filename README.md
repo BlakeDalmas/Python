@@ -11,6 +11,7 @@ After doing all of that, you should be able to get the files for the game from t
 For The Great Skeleton War, you have to run lab_12.py to launch the actual game.
 
 The Great Skeleton War:
+=======================
 
 This is a tower defence game that has three seperate ages. The Stone Age, the Medieval Age, and the Modern Age. In each age you get new
 towers that you can buy. There's a horde of skeletons coming to destroy your village and as the game progresses stronger skeletons spawn
@@ -21,11 +22,16 @@ Version 2.0 : Changelog
 Bug Fixes
 ---------
 Fixed a bug where the game would crash if config.txt was missing a keybinding.
+
 Fixed a bug where using Burden on an de-activated hyperskeleton causes them to move at hyper speed
 instead of slowing down.
+
 Fixed a bug where the Ultimate Orb could teleport to activated hyperskeletons.
+
 Fixed a bug where you could cast venomblade while your sword was already poisoned.
+
 Fixed a bug where you could get extra experience by doing more damage than what would kill the enemy.
+
 Fixed a bug where towers and spells wouldn't target the right enemies.
 
 Reducing Lag
