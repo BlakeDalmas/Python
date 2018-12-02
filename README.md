@@ -18,10 +18,10 @@ towers that you can buy. There's a horde of skeletons coming to destroy your vil
 in higher quantities. Oh, also you're a wizard that can cast spells. You can unlock new spells or upgrade your spells by killing enemies and leveling up. The map is randomly generated and the game has three different difficulties. 
 
 Version 2.0 : Changelog
-=======================
+-----------------------
 
-Bug Fixes
----------
+<b>Bug Fixes</b>
+
 Fixed a bug where the game would crash if config.txt was missing a keybinding.
 
 Fixed a bug where using Burden on an de-activated hyperskeleton causes them to move at hyper speed
@@ -35,8 +35,8 @@ Fixed a bug where you could get extra experience by doing more damage than what 
 
 Fixed a bug where towers and spells wouldn't target the right enemies.
 
-Reducing Lag
-------------
+<b>Reducing Lag</b>
+
 Modified the damage number system:
     Instead of having thousands of hard-to-read and laggy damage numbers everywhere, each enemy can only have one damage number at a
     time. If you attack an enemy rapidly, the damage number will simply go up instead of creating another one.
@@ -49,8 +49,8 @@ Made tower detection more efficient:
     Towers only check for nearby enemies every .1 seconds or so instead of every frame. Also they check through the list backwards
     because the enemy they are going to target will most likely be at the front of the list, rather than the back.
 
-New Features and Changes
-------------------------
+<b>New Features and Changes</b>
+
 Spells and Skills:
    Instead of having a ~20% chance to get an ultimate randomly, after you reach level 10, you get an Ultimate Skillpoint.
    If you have any spells that have all of their skills purchased, you can click on the icon of that spell to spend the
@@ -111,7 +111,7 @@ General:
    of the game. Hyperskeletons appear mere feet away from your village, you start with no money, raptors start spawning by wave 5, 
    and it only gets worse from there.
 
-Misc
-----
+<b>Misc Changes</b>
+
 Added 1 more skeleton to the first wave so that if you kill all the skeletons with no towers on wave 1 you get to level up
 before the wave ends, rather than after.
