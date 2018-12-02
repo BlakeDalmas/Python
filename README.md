@@ -15,7 +15,12 @@ The Great Skeleton War:
 
 This is a tower defence game that has three seperate ages. The Stone Age, the Medieval Age, and the Modern Age. In each age you get new
 towers that you can buy. There's a horde of skeletons coming to destroy your village and as the game progresses stronger skeletons spawn
-in higher quantities. Oh, also you're a wizard that can cast spells. You can unlock new spells or upgrade your spells by killing enemies and leveling up. The map is randomly generated and the game has three different difficulties. 
+in higher quantities. You also play as a wizard that can cast spells. You can unlock new spells or upgrade your spells by killing enemies and leveling up. The game includes various other features such as randomized maps, multiple difficulties, a console with cheat codes, and more.
+
+Here's a video demonstration of version 1.0:
+
+https://www.youtube.com/watch?v=4yRxBYXP_Eo
+
 
 Version 2.0 : Changelog
 -----------------------
