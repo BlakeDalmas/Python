@@ -44,65 +44,65 @@ Made tower detection more efficient:
 
 New Features and Changes
 ------------------------
-Spells and Skills
-    Instead of having a ~20% chance to get an ultimate randomly, after you reach level 10, you get an Ultimate Skillpoint.
-    If you have any spells that have all of their skills purchased, you can click on the icon of that spell to spend the
-    Ultimate Skillpoint and make that spell go ultimate. Otherwise, it acts as a normal skillpoint.
+Spells and Skills:
+   Instead of having a ~20% chance to get an ultimate randomly, after you reach level 10, you get an Ultimate Skillpoint.
+   If you have any spells that have all of their skills purchased, you can click on the icon of that spell to spend the
+   Ultimate Skillpoint and make that spell go ultimate. Otherwise, it acts as a normal skillpoint.
 
-    Reaching level 10, and other things associated with Ultimates have cooler graphics and sounds now.
+   Reaching level 10, and other things associated with Ultimates have cooler graphics and sounds now.
 
-    The way spells and skills are added have been re-programmed so that it's far easier to simply add a new spell without
-    worrying about changing little variables everywhere.
+   The way spells and skills are added have been re-programmed so that it's far easier to simply add a new spell without
+   worrying about changing little variables everywhere.
 
-    Lightning shoots faster and costs less mana.
+   Lightning shoots faster and costs less mana.
 
-    New Spell: Magic Missile
+   New Spell: Magic Missile
 
-    New Spell: Starblast
+   New Spell: Starblast
 
-    Passive Spells no longer show up in the spell selection menu at all.
+   Passive Spells no longer show up in the spell selection menu at all.
 
-    Every game, you can choose from 2 random spells and the passive spell. Rather than 3 spells of a certain type.
+   Every game, you can choose from 2 random spells and the passive spell. Rather than 3 spells of a certain type.
 
-    Made a new spell type called Sorcery. Magic Missile, Burden, and Starblast go into this.
+   Made a new spell type called Sorcery. Magic Missile, Burden, and Starblast go into this.
 
-    Made a new spell type called Passive, essentially, this is just battlemage and mysticism combined.
+   Made a new spell type called Passive, essentially, this is just battlemage and mysticism combined.
 
-    The inferno ultimate also extends the duration of the fire.
+   The inferno ultimate also extends the duration of the fire.
 
-    Dart ultimate instant kill chance: 10% -> 25%
+   Dart ultimate instant kill chance: 10% -> 25%
 
-    Cloud ultimate changed, instead of allowing you to place 3 at once, any enemy that dies from the cloud places
-    another cloud.
+   Cloud ultimate changed, instead of allowing you to place 3 at once, any enemy that dies from the cloud places
+   another cloud.
 
-    Venomblade ultimate makes the poison last forever, instead of 3 swings.
+   Venomblade ultimate makes the poison last forever, instead of 3 swings.
 
 
 General:
-    You can now press 1-3 on the keyboard to quickly switch to another spell. You can rebind these in the options.
+   You can now press 1-3 on the keyboard to quickly switch to another spell. You can rebind these in the options.
 
-    Made it easier to program new buttons into the options menu.
+   Made it easier to program new buttons into the options menu.
 
-    The spell you currently have selected is shown next to the spell hand icon.
+   The spell you currently have selected is shown next to the spell hand icon.
 
-    You can now pause the game at any time (deafult is P, key bind can be changed in options).
+   You can now pause the game at any time (deafult is P, key bind can be changed in options).
 
-    Hyperskeletons have been buffed, they remain invincible until about 3/4 through the map instead of 1/2.
+   Hyperskeletons have been buffed, they remain invincible until about 3/4 through the map instead of 1/2.
 
-    Towers have more variability on their delays so they won't all attack at the same exact time every time.
+   Towers have more variability on their delays so they won't all attack at the same exact time every time.
 
-    Towers have slight inaccuracy, especially in the case of the tank, it makes it look more like bullets and less like a laser.
+   Towers have slight inaccuracy, especially in the case of the tank, it makes it look more like bullets and less like a laser.
 
-    The game now has 3 separate difficulties:
+   The game now has 3 separate difficulties:
     
-    Normal: A good difficulty for new players. Lich chains and skeleon lords are removed, you start with more money, gain more money on
-    kill, and you need less money to win.
+   Normal: A good difficulty for new players. Lich chains and skeleon lords are removed, you start with more money, gain more money on
+   kill, and you need less money to win.
     
-    Hard: Essentially what the game was like originally. Better for players that have played the game before.
+   Hard: Essentially what the game was like originally. Better for players that have played the game before.
     
-    Nightmare: Ridiculously difficult, don't expect to even get close to winning unless you know how to exploit the finest details
-    of the game. Hyperskeletons appear mere feet away from your village, you start with no money, raptors start spawning by wave 5, 
-    and it only gets worse from there.
+   Nightmare: Ridiculously difficult, don't expect to even get close to winning unless you know how to exploit the finest details
+   of the game. Hyperskeletons appear mere feet away from your village, you start with no money, raptors start spawning by wave 5, 
+   and it only gets worse from there.
 
 Misc
 ----
