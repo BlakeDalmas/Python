@@ -18,6 +18,7 @@ towers that you can buy. There's a horde of skeletons coming to destroy your vil
 in higher quantities. Oh, also you're a wizard that can cast spells. You can unlock new spells or upgrade your spells by killing enemies and leveling up. The map is randomly generated and the game has three different difficulties. 
 
 Version 2.0 : Changelog
+=======================
 
 Bug Fixes
 ---------
