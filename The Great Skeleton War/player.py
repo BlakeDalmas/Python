@@ -4,6 +4,7 @@ import globalvars
 import random
 import gamedata
 import os
+import spell_data
 
 SCREEN_WIDTH = 1440
 SCREEN_HEIGHT = 768
@@ -31,13 +32,12 @@ class Player(arcade.Sprite):
         self.sword_poisoned = 0
 
         self.window_ref = None
-        self.enemy_list = None
         self.spell_list = None
         self.spell_icon_list = None
+        self.current_spell_icon = None
         self.bullet_list = None
         self.skill_list = []
         self.inferno_list = []
-        self.cloud_list = []
         self.orb_list = []
 
         self.rendering_animation = False
@@ -51,6 +51,15 @@ class Player(arcade.Sprite):
 
         self.animation_list = []
 
+    def getNearbyEnemies(self, source, range):
+        result = []
+
+        for enemy in globalvars.enemy_list:
+            if (((source.center_x - enemy.center_x) ** 2) + ((source.center_y - enemy.center_y) ** 2)) <= range ** 2:
+                result.append(enemy)
+
+        return result
+
     def give_exp(self, amount):
         if self.level < 10:
             self.exp_cur += amount
@@ -61,6 +70,11 @@ class Player(arcade.Sprite):
     def check_levelup(self):
         if self.exp_cur >= self.exp_cap:
             globalvars.emit_sound("levelup.ogg")
+
+            if (self.level == 9):
+                globalvars.skills_ultimate = True
+                globalvars.emit_sound("ult_select.ogg")
+
             self.level += 1
             self.skillpoints += 1
             self.exp_cur = self.exp_cur - self.exp_cap
@@ -80,15 +94,23 @@ class Player(arcade.Sprite):
             if self.exp_cur >= self.exp_cap:
                 self.check_levelup()
 
-    def give_spell(self, spell):
+    def give_spell(self, spell_name):
+        found_spell = []
+
+        for item in spell_data.spells:
+            if spell_name == item[1]:
+                found_spell = item
+
         exists = False
         for item in self.spell_list:
-            if item == spell:
+            if item == found_spell:
                 exists = True
 
         if not exists:
-            self.spell_list.append(spell)
-            self.spell_icon_list.append(arcade.load_texture("images/UI/icons/" + spell + ".png"))
+            self.spell_list.append(found_spell)
+
+            if found_spell[0] != "passive":
+                self.spell_icon_list.append(arcade.load_texture("images/UI/icons/" + spell_name + ".png"))
 
     def give_skill(self, skill):
         exists = False
@@ -105,8 +127,14 @@ class Player(arcade.Sprite):
         self.mana_regen_delay += 1
         if self.mana_regen_delay > 10 and self.mana < self.mana_cap:
             self.mana += 1
-            if self.player_has_skill("Afinity"):
-                self.mana_regen_delay = 5
+
+            if self.player_has_skill("Affinity"):
+                vit = 5
+
+                if self.player_has_skill("Vitality"):
+                    vit = 7
+
+                self.mana_regen_delay = vit
             else:
                 self.mana_regen_delay = 0
 
@@ -197,12 +225,52 @@ class Player(arcade.Sprite):
         return result
 
     def key_press(self, key, modifier):
+        # Quick Select a spell with 1-2-3
+        quickspell = -1
+
+        if self.check_key(6, key):
+            quickspell = 0
+
+        if self.check_key(7, key):
+            quickspell = 1
+
+        if self.check_key(8, key):
+            quickspell = 2
+
+        adj_list = self.spell_list.copy()
+        local_done = False
+
+        while not local_done:
+            local_finished = True
+
+            for item in adj_list:
+                if item[0] == "passive":
+                    adj_list.remove(item)
+                    local_finished = False
+                    break
+
+            local_done = local_finished
+
+        if quickspell >= 0 and quickspell < len(adj_list):
+            new_spell = adj_list[quickspell]
+
+            if new_spell != self.selected_spell:
+                globalvars.emit_sound("click.ogg")
+                self.selected_spell = adj_list[quickspell]
+                self.current_spell_icon = self.spell_icon_list[quickspell]
+
+
         # Sword
         if self.check_key(4, key) and not self.attacking:
             if self.curtime > self.slash_delay:
                 delay = 40
+
                 if self.player_has_skill("Frenzy"):
                     delay = 30
+
+                    if self.player_has_skill("Vitality"):
+                        delay = 20
+
                 self.slash_delay = self.curtime + delay
                 self.attacking = True
                 temp = "slash/" + self.direction
@@ -238,23 +306,34 @@ class Player(arcade.Sprite):
                     box_down = self.center_y - side_range
 
                 # If any enemies are in this range damage them.
-                for enemy in self.enemy_list:
+                for enemy in globalvars.enemy_list:
                     if box_left < enemy.center_x < box_right and box_down < enemy.center_y < box_up:
                         globalvars.emit_sound("knife_hit.ogg")
 
                         damage = self.melee_damage
+
                         if self.player_has_skill("Beserk"):
                             damage = self.melee_damage + 35
+
+                            if self.player_has_skill("Vitality"):
+                                damage = damage + 35
+
                         enemy.on_take_damage(damage, True)
 
                         if self.player_has_skill("Siphon"):
                             amount = 5
-                            if (self.mana_cap - self.mana) < 5:
+
+                            if self.player_has_skill("Vitality"):
+                                amount = 10
+
+                            if (self.mana_cap - self.mana) < amount:
                                 amount = self.mana_cap - self.mana
+
                             self.mana += amount
 
                         if self.sword_poisoned > 0:
-                            self.sword_poisoned -= 1
+                            if not self.player_has_skill("Eternal"):
+                                self.sword_poisoned -= 1
 
                             duration = 200
                             damage = 3
@@ -284,7 +363,8 @@ class Player(arcade.Sprite):
                             self.bullet_list.append(poison)
                             self.surged = False
 
-                        break   # Prevents multiple enemies being hit. (Though this could be a feature)
+                        if not self.player_has_skill("Fury"):
+                            break   # Prevents multiple enemies being hit.
             else:
                 if not self.player_has_skill("Frenzy"):
                     self.slash_delay += 5   # Spamming the button increases the delay
@@ -293,16 +373,52 @@ class Player(arcade.Sprite):
         if self.check_key(5, key) and not self.attacking:
             if self.curtime > self.cast_delay:
                 if len(self.selected_spell) > 0:
+                    local_spell_name = self.selected_spell[1]
+
                     delay = 40
-                    if self.selected_spell == "Lightning" and self.player_has_skill("Rapid"):
-                        delay = 20
-                    self.cast_delay = self.curtime + delay
-                    self.attacking = True
-                    temp = "spellcast/" + self.direction
-                    self.play_animation(temp, 2)
-                    self.cast_spell(self.selected_spell)
+                    if local_spell_name == "Lightning":
+                        delay = 30
+                        if self.player_has_skill("Rapid"):
+                            delay = 20
+
+                    if local_spell_name == "Magic Missile":
+                        if self.player_has_skill("Barrage"):
+                            delay = 25
+
+                    if self.player_has_skill("Spellcaster"):
+                        delay = int(math.ceil(delay / 2))
+
+                        if self.player_has_skill("Vitality"):
+                            delay = int(math.ceil(delay / 2))
+
+                    should_cast = True
+
+                    if local_spell_name == "Venomblade":
+                        if self.player_has_skill("Eternal") and self.sword_poisoned == 1:
+                            should_cast = False
+
+                        if not self.player_has_skill("Eternal") and self.sword_poisoned == 1:
+                            should_cast = False
+
+                    if should_cast:
+                        self.cast_delay = self.curtime + delay
+                        self.attacking = True
+                        temp = "spellcast/" + self.direction
+                        self.play_animation(temp, 2)
+                        self.cast_spell(local_spell_name)
             else:
-                if not self.player_has_skill("Frenzy"):
+                prevent_spam = True
+
+                if self.player_has_skill("Frenzy"):
+                    prevent_spam = False
+
+                if self.selected_spell[1] == "Lightning" and self.player_has_skill("Rapid"):
+                    prevent_spam = False
+
+                if self.selected_spell[1] == "Magic Missile" and self.player_has_skill("Barrage"):
+                    prevent_spam = False
+
+                if prevent_spam:
                     self.cast_delay += 5    # Spamming the button increases the delay
 
         # Movement
@@ -338,8 +454,12 @@ class Player(arcade.Sprite):
 
     def check_mana(self, cost):
         can_cast = False
+
         if self.player_has_skill("Mastery"):
-            cost = round(cost / 1.5)
+            cost = math.ceil(cost / 1.5)
+
+            if self.player_has_skill("Vitality"):
+                cost = math.ceil(cost / 1.5)
 
         if self.mana > cost:
             self.mana -= cost
@@ -364,7 +484,7 @@ class Player(arcade.Sprite):
             effect.center_x = enemy.center_x
             effect.center_y = enemy.center_y
             effect.enemy = enemy
-            effect.enemy_list = self.enemy_list
+            effect.enemy_list = globalvars.enemy_list
             effect.player = self
             effect.bullet_list = self.bullet_list
             effect.lifetime = duration
@@ -376,7 +496,8 @@ class Player(arcade.Sprite):
 
     # I probably could have automated this way more using sub-classes but the spells varied so much I didn't think it would help much.
 
-    def cast_spell(self, spell):
+    def cast_spell(self, spell_data):
+        spell = spell_data
 
         globalvars.emit_sound("spell_cast_" + str(random.randint(1, 5)) + ".ogg")
 
@@ -416,7 +537,7 @@ class Player(arcade.Sprite):
             fireball.explosion_damage = round(fireball.contact_damage / 2.5)
             fireball.attack_radius = 16
             fireball.explosion_radius = 64
-            fireball.enemy_list = self.enemy_list
+            fireball.enemy_list = globalvars.enemy_list
             fireball.bullet_list = self.bullet_list
             fireball.player = self
 
@@ -443,7 +564,7 @@ class Player(arcade.Sprite):
             beam.speed = speed
             beam.change_x = x_change * beam.speed
             beam.change_y = y_change * beam.speed
-            beam.enemy_list = self.enemy_list
+            beam.enemy_list = globalvars.enemy_list
             beam.damage = damage
             beam.penetrate = 5
             beam.hit_list = []
@@ -468,19 +589,25 @@ class Player(arcade.Sprite):
                 item.kill()
 
             length = 3
+
             if self.player_has_skill("Wildfire"):
                 length = 9
 
             duration = 200
+
             if self.player_has_skill("Fueled"):
                 duration = 300
+
+            if self.player_has_skill("Wildfire"):
+                duration *= 2
+
             for i in range(length):
                 inferno = Inferno("images/effects/inferno/1.png")
                 inferno.center_x = self.center_x + (x_change * (i + 1) * 32)
                 inferno.center_y = self.center_y + (y_change * (i + 1) * 32)
                 inferno.duration = duration
                 inferno.curtime = 0
-                inferno.enemy_list = self.enemy_list
+                inferno.enemy_list = globalvars.enemy_list
                 inferno.anim_track = 0
                 inferno.hit_delay = 0
 
@@ -511,7 +638,7 @@ class Player(arcade.Sprite):
                 damage = round(damage * 1.5)
 
             dart.damage = damage
-            dart.enemy_list = self.enemy_list
+            dart.enemy_list = globalvars.enemy_list
             dart.hit_list = []
 
             if self.direction == "right":
@@ -531,19 +658,11 @@ class Player(arcade.Sprite):
             self.surged = False
 
         if spell == "Venomblade" and self.check_mana(25):
-            if self.player_has_skill("Eternal"):
-                self.sword_poisoned = 3
-            else:
-                self.sword_poisoned = 1
+            self.sword_poisoned = 1
 
         if spell == "Cloud" and self.check_mana(35):
-            if self.player_has_skill("Plague"):
-                if len(self.cloud_list) > 2:
-                    for i in range(0, len(self.cloud_list) - 2):
-                        self.cloud_list[i].kill()
-            else:
-                for item in self.cloud_list:
-                    item.kill()
+            if self.pcloud is not None:
+                self.pcloud.kill()
 
             cloud = Cloud("images/status.png")
             cloud.center_x = self.center_x + (x_change * 32)
@@ -559,7 +678,7 @@ class Player(arcade.Sprite):
             cloud.range = size
             cloud.hit_list = []
             cloud.player = self
-            cloud.enemy_list = self.enemy_list
+            cloud.enemy_list = globalvars.enemy_list
             cloud.bullet_list = self.bullet_list
             cloud.damage_delay = 0
 
@@ -567,10 +686,10 @@ class Player(arcade.Sprite):
                 cloud.append_texture(arcade.load_texture("images/effects/poison_cloud/" + str(i) + ".png"))
 
             self.bullet_list.append(cloud)
-            self.cloud_list.append(cloud)
+            self.pcloud = cloud
             self.surged = False
 
-        if spell == "Lightning" and self.check_mana(15):
+        if spell == "Lightning" and self.check_mana(10):
             damage = 25
             if self.player_has_skill("Voltage"):
                 damage = 35
@@ -593,7 +712,7 @@ class Player(arcade.Sprite):
             shock.change_y = y_change * shock.speed
             shock.player = self
             shock.damage = damage
-            shock.enemy_list = self.enemy_list
+            shock.enemy_list = globalvars.enemy_list
             shock.hit_list = []
 
             if self.direction == "right":
@@ -636,7 +755,7 @@ class Player(arcade.Sprite):
             thunder.damage = damage
             thunder.radius = radius
             thunder.anim_track = 0
-            thunder.enemy_list = self.enemy_list
+            thunder.enemy_list = globalvars.enemy_list
             thunder.bullet_list = self.bullet_list
             thunder.player = self
 
@@ -698,6 +817,128 @@ class Player(arcade.Sprite):
 
             self.bullet_list.append(burden)
 
+        if spell == "Magic Missile" and self.check_mana(15):
+            if self.active_mm is not None and not self.player_has_skill("Devour"):
+                self.active_mm.kill()
+
+            mm = MagicMissile("images/status.png")
+            mm.center_x = self.center_x + (x_change * 32)
+            mm.center_y = self.center_y + (y_change * 32)
+
+            size = 32
+
+            if self.player_has_skill("Devour"):
+                size = 50
+
+            drag = size
+
+            if self.player_has_skill("Concentrate"):
+                drag = size / 2
+
+            if self.player_has_skill("Overcharged"):
+                size = size + (size * (self.mana / self.mana_cap))
+
+            img_scale = size / 256
+
+            base_damage = 50
+            if self.player_has_skill("Devastating"):
+                base_damage = 75
+
+            local_damage = int(base_damage + (math.pow(32, math.sqrt(size) / 10)))
+
+            if self.player_has_skill("Devour") and self.active_mm is not None:
+                current_volume = math.pow((self.active_mm.size / 2), 3) * math.pi * (4 / 3)
+                new_volume = math.pow((size / 2), 3) * math.pi * (4 / 3)
+                adj_volume = current_volume + new_volume
+                adj_radius = math.pow(adj_volume / (math.pi * (4 / 3)), (1 / 3))
+
+                size = (adj_radius * 2) + 3
+
+                drag = size
+
+                if self.player_has_skill("Concentrate"):
+                    drag = size / 2
+
+                img_scale = size / 256
+                local_damage = int(base_damage + (math.pow(32, math.sqrt(size) / 10)))
+
+                mm.center_x = self.active_mm.center_x
+                mm.center_y = self.active_mm.center_y
+
+                self.active_mm.kill()
+
+            mm.curtime = 0
+            mm.range = size / 2
+            mm.hit_list = []
+            mm.player = self
+            mm.enemy_list = globalvars.enemy_list
+            mm.bullet_list = self.bullet_list
+            mm.damage_delay = 0
+            mm.damage = local_damage
+            mm.drag = drag
+            mm.img_scale = img_scale
+            mm.size = size
+
+            for i in range(1, 6):
+                mm.append_texture(arcade.load_texture("images/effects/magic_missile/" + str(i) + ".png", scale=img_scale))
+
+            self.bullet_list.append(mm)
+            self.active_mm = mm
+
+        if spell == "Starblast" and self.check_mana(16):
+            sb = Starblast("images/status.png")
+            sb.center_x = self.center_x + (x_change * 32)
+            sb.center_y = self.center_y + (y_change * 32)
+
+            size = self.mana
+
+            if self.player_has_skill("Dark Energy"):
+                self.mana -= int(math.ceil(self.mana / 4))
+            else:
+                self.mana = 0
+
+            if self.player_has_skill("Protostar") and size < 64:
+                size = 64
+
+            img_scale = size / 128
+
+            local_damage = int(math.ceil((math.pow(5, math.pow(size, (1/4))))))
+
+            local_range = size / 4
+
+            if self.player_has_skill("Red Giant"):
+                local_range = size / 2
+
+            local_range += 16
+
+            sb.curtime = 0
+            sb.range = local_range
+            sb.hit_list = []
+            sb.player = self
+            sb.enemy_list = globalvars.enemy_list
+            sb.bullet_list = self.bullet_list
+            sb.damage_delay = 0
+            sb.damage = local_damage
+            sb.img_scale = img_scale
+            sb.size = size
+            sb.anim_pattern = [1, 1, 65, 2, 2, 2, 1]
+            sb.anim_track = 0
+
+            if size > 320:
+                globalvars.emit_sound("starblast_superheavy.ogg")
+            if size >= 192:
+                globalvars.emit_sound("starblast_heavy.ogg")
+            elif size > 64:
+                globalvars.emit_sound("starblast_normal.ogg")
+            else:
+                globalvars.emit_sound("starblast_light.ogg")
+
+            for i in range(1, 8):
+                sb.append_texture(arcade.load_texture("images/effects/starblast/" + str(i) + ".png", scale=img_scale))
+
+            self.bullet_list.append(sb)
+
+
 # One-time effect that displays all the textures found in the sprite on a delay and deletes itself afterwards
 class Effect(arcade.Sprite):
     def _init_(self):
@@ -720,7 +961,6 @@ class Effect(arcade.Sprite):
 class Flame(arcade.Sprite):
     def _init_(self):
         self.enemy = None
-        self.enemy_list = None
         self.player = None
         self.bullet_list = None
         self.lifetime = 0
@@ -745,7 +985,7 @@ class Flame(arcade.Sprite):
                 effect.delay = 1
                 self.bullet_list.append(effect)
 
-                for enemy in self.enemy_list:
+                for enemy in globalvars.enemy_list:
                     if (((self.center_x - enemy.center_x) ** 2) + ((self.center_y - enemy.center_y) ** 2)) <= 64 ** 2:
                         enemy.on_take_damage(50, True)
                         if enemy.ignite <= 0:
@@ -774,7 +1014,6 @@ class Fireball(arcade.Sprite):
         self.explosion_damage = 0
         self.attack_radius = 0
         self.explosion_radius = 0
-        self.enemy_list = []
         self.bullet_list = []
         self.player = None
 
@@ -786,7 +1025,7 @@ class Fireball(arcade.Sprite):
         if self.center_x > SCREEN_WIDTH + 32 or self.center_x < -32 or self.center_y > SCREEN_HEIGHT + 32 or self.center_y < -32:
             self.kill()
 
-        for enemy in self.enemy_list:
+        for enemy in globalvars.enemy_list:
             if (((self.center_x - enemy.center_x) ** 2) + ((self.center_y - enemy.center_y) ** 2)) <= self.attack_radius ** 2:
                 # Contact Damage
                 globalvars.emit_sound("fireball_hit.ogg")
@@ -802,7 +1041,7 @@ class Fireball(arcade.Sprite):
                 effect.center_x = enemy.center_x
                 effect.center_y = enemy.center_y
                 effect.enemy = enemy
-                effect.enemy_list = self.enemy_list
+                effect.enemy_list = globalvars.enemy_list
                 effect.player = self.player
                 effect.bullet_list = self.bullet_list
                 effect.lifetime = i_time
@@ -825,7 +1064,7 @@ class Fireball(arcade.Sprite):
                     self.bullet_list.append(effect)
 
                     # Explosion Damage
-                    for enemy in self.enemy_list:
+                    for enemy in globalvars.enemy_list:
                         if (((self.center_x - enemy.center_x) ** 2) + ((self.center_y - enemy.center_y) ** 2)) <= self.explosion_radius ** 2:
                             enemy.on_take_damage(self.explosion_damage, True)
                             if enemy.ignite <= 0:
@@ -838,7 +1077,6 @@ class Fireball(arcade.Sprite):
 class Beam(arcade.Sprite):
     def _init_(self):
         self.penetrate = 0
-        self.enemy_list = None
         self.damage = 0
         self.hit_list = []
         self.player = None
@@ -851,7 +1089,7 @@ class Beam(arcade.Sprite):
         if self.center_x > SCREEN_WIDTH + 32 or self.center_x < -32 or self.center_y > SCREEN_HEIGHT + 32 or self.center_y < -32:
             self.kill()
 
-        for enemy in self.enemy_list:
+        for enemy in globalvars.enemy_list:
             if (((self.center_x - enemy.center_x) ** 2) + ((self.center_y - enemy.center_y) ** 2)) <= 15 ** 2:
                 if self.penetrate > 0:
                     in_list = False
@@ -887,7 +1125,6 @@ class Inferno(arcade.Sprite):
     def _init_(self):
         self.duration = 0
         self.curtime = 0
-        self.enemy_list = []
         self.anim_track = 0
         self.hit_delay = 0
         self.damage = 0
@@ -903,7 +1140,7 @@ class Inferno(arcade.Sprite):
             self.anim_track = 0
         self.set_texture(self.anim_track)
 
-        for enemy in self.enemy_list:
+        for enemy in globalvars.enemy_list:
             if (((self.center_x - enemy.center_x) ** 2) + ((self.center_y - enemy.center_y) ** 2)) <= 15 ** 2 and self.curtime > self.hit_delay:
                 self.hit_delay = self.curtime + 2
 
@@ -925,7 +1162,6 @@ class Dart(arcade.Sprite):
     def _init_(self):
         self.player = None
         self.damage = 0
-        self.enemy_list = []
         self.hit_list = []
 
     def update(self):
@@ -935,7 +1171,7 @@ class Dart(arcade.Sprite):
         if self.center_x > SCREEN_WIDTH + 32 or self.center_x < -32 or self.center_y > SCREEN_HEIGHT + 32 or self.center_y < -32:
             self.kill()
 
-        for enemy in self.enemy_list:
+        for enemy in globalvars.enemy_list:
             if (((self.center_x - enemy.center_x) ** 2) + ((self.center_y - enemy.center_y) ** 2)) <= 15 ** 2:
                 already_hit = False
                 for item in self.hit_list:
@@ -947,7 +1183,7 @@ class Dart(arcade.Sprite):
                     self.hit_list.append(enemy)
 
                     if self.player.player_has_skill("Lethal"):
-                        if random.randint(1, 5) == 3:
+                        if random.randint(1, 4) == 3:
                             if enemy.name != "skeletonlord":
                                 enemy.health = 0
                                 enemy.kill()
@@ -1068,6 +1304,7 @@ class Cloud_Poison(arcade.Sprite):
         self.damage_delay = 0
         self.curtime = 0
         self.player = None
+        self.bullet_list = []
 
     def update(self):
         self.curtime += 1
@@ -1076,7 +1313,34 @@ class Cloud_Poison(arcade.Sprite):
         self.center_y = self.enemy.center_y
         self.set_texture(random.randint(1, 5))
 
+        if self.enemy.health <= 0:
+            if self.player.player_has_skill("Plague"):
+                cloud = Cloud("images/status.png")
+                cloud.center_x = self.enemy.center_x
+                cloud.center_y = self.enemy.center_y
+
+                size = 32
+
+                if self.player.player_has_skill("Expansive"):
+                    size = 48
+
+                duration = 150
+                cloud.duration = duration
+                cloud.curtime = 0
+                cloud.range = size
+                cloud.hit_list = []
+                cloud.player = self.player
+                cloud.enemy_list = globalvars.enemy_list
+                cloud.bullet_list = self.bullet_list
+                cloud.damage_delay = 0
+
+                for i in range(1, 6):
+                    cloud.append_texture(arcade.load_texture("images/effects/poison_cloud/" + str(i) + ".png"))
+
+                self.bullet_list.append(cloud)
+
         if self.curtime > self.duration or self.enemy.health <= 0:
+            self.enemy.poisoned = None
             self.kill()
 
         if self.curtime > self.damage_delay:
@@ -1088,7 +1352,6 @@ class Cloud(arcade.Sprite):
         self.duration = 0
         self.curtime = 0
         self.hit_list = []
-        self.enemy_list = []
         self.player = None
         self.range = 0
         self.bullet_list = []
@@ -1102,13 +1365,18 @@ class Cloud(arcade.Sprite):
         if self.curtime > self.duration:
             self.kill()
 
-        for enemy in self.enemy_list:
+        for enemy in globalvars.enemy_list:
             if (((self.center_x - enemy.center_x) ** 2) + ((self.center_y - enemy.center_y) ** 2)) <= self.range ** 2:
                 if self.curtime > self.damage_delay:
                     self.damage_delay = self.curtime + 10
+
                     damage = 3
+
                     if self.player.player_has_skill("Noxious"):
                         damage = 5
+
+                    local_pre_x = enemy.center_x
+                    local_pre_y = enemy.center_y
                     enemy.on_take_damage(damage, True)
 
                 already_hit = False
@@ -1117,35 +1385,45 @@ class Cloud(arcade.Sprite):
                         already_hit = True
 
                 if not already_hit:
-                    if self.player.player_has_skill("Caustic"):
-                        self.player.ignite(enemy, 12)
-
-                    poison = Cloud_Poison("images/status.png")
-                    poison.enemy = enemy
-
                     duration = 200
                     if self.player.player_has_skill("Venomous"):
                         duration = 300
 
-                    poison.duration = duration
-                    poison.damage = 2
-                    poison.damage_delay = 0
-                    poison.curtime = 0
-                    poison.center_x = -1000
-                    poison.center_y = -1000
-                    poison.player = self.player
+                    if enemy.poisoned is not None:
+                        enemy.poisoned.duration = duration
+                    else:
+                        if self.player.player_has_skill("Caustic"):
+                            self.player.ignite(enemy, 12)
 
-                    for i in range(1, 6):
-                        poison.append_texture(arcade.load_texture("images/effects/poison/" + str(i) + ".png"))
+                        poison = Cloud_Poison("images/status.png")
+                        poison.enemy = enemy
 
-                    self.bullet_list.append(poison)
-                    self.hit_list.append(enemy)
+                        duration = 200
+                        if self.player.player_has_skill("Venomous"):
+                            duration = 300
+
+                        poison.duration = duration
+                        poison.damage = 2
+                        poison.damage_delay = 0
+                        poison.curtime = 0
+                        poison.center_x = -1000
+                        poison.center_y = -1000
+                        poison.player = self.player
+                        poison.enemy_list = globalvars.enemy_list
+                        poison.bullet_list = self.bullet_list
+
+                        for i in range(1, 6):
+                            poison.append_texture(arcade.load_texture("images/effects/poison/" + str(i) + ".png"))
+
+                        self.bullet_list.append(poison)
+                        self.hit_list.append(enemy)
+
+                        enemy.poisoned = poison
 
 class Lightning(arcade.Sprite):
     def _init_(self):
         self.player = None
         self.damage = 0
-        self.enemy_list = []
         self.hit_list = []
 
     def update(self):
@@ -1157,7 +1435,7 @@ class Lightning(arcade.Sprite):
         if self.center_x > SCREEN_WIDTH + 32 or self.center_x < -32 or self.center_y > SCREEN_HEIGHT + 32 or self.center_y < -32:
             self.kill()
 
-        for enemy in self.enemy_list:
+        for enemy in globalvars.enemy_list:
             if (((self.center_x - enemy.center_x) ** 2) + ((self.center_y - enemy.center_y) ** 2)) <= 15 ** 2:
                 enemy.on_take_damage(self.damage, True)
                 globalvars.emit_sound("lightning_hit.ogg")
@@ -1166,16 +1444,16 @@ class Lightning(arcade.Sprite):
                     self.player.mana += 3
 
                 if self.player.player_has_skill("Chain"):
-                    if random.randint(1, 10) > 2 and len(self.enemy_list) > 1:
+                    if random.randint(1, 10) > 2 and len(globalvars.enemy_list) > 1:
                         local_enemy = "Error"
-                        for i in range(len(self.enemy_list)):
+                        for i in range(len(globalvars.enemy_list)):
                             already_hit = False
                             for item in self.hit_list:
-                                if self.enemy_list[i] == item:
+                                if globalvars.enemy_list[i] == item:
                                     already_hit = True
 
                             if not already_hit:
-                                local_enemy = self.enemy_list[i]
+                                local_enemy = globalvars.enemy_list[i]
                                 break
 
                         if local_enemy == "Error":
@@ -1196,7 +1474,6 @@ class Thunder(arcade.Sprite):
         self.damage = 100
         self.radius = 48
         self.anim_track = 0
-        self.enemy_list = []
         self.bullet_list = []
         self.player = None
 
@@ -1210,7 +1487,7 @@ class Thunder(arcade.Sprite):
 
         if self.anim_track == 8 and self.anim_timer == self.curtime + 2:
             chance = random.randint(1, 20)
-            for enemy in self.enemy_list:
+            for enemy in globalvars.enemy_list:
                 y_pos = self.center_y - 42
                 if (((self.center_x - enemy.center_x) ** 2) + ((y_pos - enemy.center_y) ** 2)) <= self.radius ** 2:
                     if self.player.player_has_skill("Fiery"):
@@ -1314,8 +1591,9 @@ class Orb(arcade.Sprite):
                             if len(self.player.enemy_list) > 1:
                                 globalvars.emit_sound("orb_teleport_" + str(random.randint(1, 2)) + ".ogg")
                                 random_enemy = random.choice(self.player.enemy_list)
-                                self.center_x = random_enemy.center_x
-                                self.center_y = random_enemy.center_y
+                                if not random_enemy.invincible:
+                                    self.center_x = random_enemy.center_x
+                                    self.center_y = random_enemy.center_y
 
 class Burden(arcade.Sprite):
     def _init_(self):
@@ -1407,3 +1685,204 @@ class Burden_Status(arcade.Sprite):
             self.enemy.speed = self.enemy.set_speed * self.slow
 
 
+class MagicMissile(arcade.Sprite):
+    def _init_(self):
+        self.curtime = 0
+        self.hit_list = []
+        self.player = None
+        self.range = 0
+        self.bullet_list = []
+        self.damage = 0
+        self.drag = 10
+        self.img_scale = 0
+        self.size = 0
+
+    def update(self):
+        self.curtime += 1
+
+        self.center_x += ((self.player.current_mouse_x - self.center_x) / self.drag)
+        self.center_y += ((self.player.current_mouse_y - self.center_y) / self.drag)
+
+        self.set_texture(random.randint(1, 5))
+
+        local_exploded = False
+        dir_hit_enemy = None
+
+        nearby_enemies = self.player.getNearbyEnemies(self, self.range)
+
+        for enemy in nearby_enemies:
+            if not local_exploded:
+                local_exploded = True
+                dir_hit_enemy = enemy
+
+                enemy.on_take_damage(self.damage, True)
+
+                if self.player.player_has_skill("Incendiary"):
+                    enemy.ignite = 2
+                    ignite = Flame("images/effects/flame/1.png")
+                    for i in range(1, 12):
+                        ignite.append_texture(arcade.load_texture("images/effects/flame/" + str(i) + ".png"))
+                    ignite.center_x = enemy.center_x
+                    ignite.center_y = enemy.center_y
+                    ignite.enemy = enemy
+                    ignite.enemy_list = globalvars.enemy_list
+                    ignite.player = self.player
+                    ignite.bullet_list = self.bullet_list
+                    ignite.lifetime = self.size / 16
+                    ignite.anim_timer = 0
+                    ignite.anim_track = 0
+                    self.bullet_list.append(ignite)
+
+                self.player.active_mm = None
+                globalvars.emit_sound("mm_hit.ogg")
+
+                local_scale = self.img_scale
+
+                effect = MagicMissileEffect("images/status.png")
+                effect.append_texture(arcade.load_texture("images/effects/mm_explode/1.png", scale=local_scale))
+                effect.append_texture(arcade.load_texture("images/effects/mm_explode/" + str(random.randint(2, 5)) + ".png", scale=local_scale))
+                effect.img_track = 1
+                effect.pos_x = self.center_x
+                effect.pos_y = self.center_y
+                effect.curtime = 0
+                effect.delay = 2
+                effect.delay_track = 0
+                self.bullet_list.append(effect)
+
+        if local_exploded:
+            if self.player.player_has_skill("Blast"):
+                nearby_enemies = self.player.getNearbyEnemies(self, self.range * 3)
+
+                for enemy in nearby_enemies:
+                    if enemy != dir_hit_enemy:
+                        enemy.on_take_damage(int(self.damage / 2), True)
+
+            self.kill()
+
+class MagicMissileEffect(arcade.Sprite):
+    def _init_(self):
+        self.img_track = 0
+        self.pos_x = 0
+        self.pos_y = 0
+        self.curtime = 0
+        self.delay = 0
+        self.delay_track = 0
+
+    def update(self):
+        self.center_x = self.pos_x
+        self.center_y = self.pos_y
+        self.curtime += 1
+
+        if self.curtime > self.delay_track:
+            self.delay_track += self.delay
+
+            if self.img_track == 3:
+                self.kill()
+            else:
+                self.set_texture(self.img_track)
+                self.img_track += 1
+
+class Starblast(arcade.Sprite):
+    def _init_(self):
+        self.curtime = 0
+        self.hit_list = []
+        self.player = None
+        self.range = 0
+        self.bullet_list = []
+        self.damage = 0
+        self.img_scale = 0
+        self.size = 0
+        self.anim_pattern = 0
+        self.anim_track = 0
+
+    def update(self):
+        if self.anim_track >= len(self.anim_pattern):
+            self.kill()
+        else:
+            self.set_texture(self.anim_track + 1)
+
+            if self.curtime > self.anim_pattern[self.anim_track]:
+                if self.anim_track == 5:
+                    self.explode()
+
+                self.curtime = 0
+                self.anim_track += 1
+            else:
+                self.curtime += 1
+
+    def explode(self):
+        if self.player.player_has_skill("Gamma Rays"):
+
+            ray_range = math.floor(math.pow(self.damage, (1/4))) - 2
+
+            if ray_range < 0:
+                ray_range = 0
+
+            if random.random() > .5:
+                ray_range += 1
+
+            for i in range(ray_range):
+                damage = 15
+                speed = 10
+                if self.player.player_has_skill("Hyper"):
+                    damage = 25
+                    speed = 15
+
+                if self.player.surged:
+                    damage = round(damage * 1.5)
+
+                random_xdir = random.random()
+                random_ydir = random.random()
+
+                if random.random() > .5:
+                    random_xdir *= -1
+
+                if random.random() > .5:
+                    random_ydir *= -1
+
+                beam = Beam("images/TD/entities/projectile/starblast_beam.png")
+                beam.center_x = self.center_x
+                beam.center_y = self.center_y
+                beam.speed = speed * 2
+                beam.change_x = random_xdir * beam.speed
+                beam.change_y = random_ydir * beam.speed
+                beam.enemy_list = globalvars.enemy_list
+                beam.damage = damage * 2
+                beam.penetrate = 5
+                beam.hit_list = []
+                beam.player = self.player
+
+                beam.angle = math.degrees(math.atan2(random_ydir, random_xdir))
+
+                self.bullet_list.append(beam)
+
+        nearby_enemies = self.player.getNearbyEnemies(self, self.range)
+
+        for enemy in nearby_enemies:
+            enemy.on_take_damage(self.damage, True)
+
+            if self.player.player_has_skill("Radioactive"):
+                poison = Cloud_Poison("images/status.png")
+                poison.enemy = enemy
+
+                duration = 150 + int(math.sqrt(self.damage))
+
+                poison.duration = duration
+                poison.damage = int(math.ceil(math.pow(self.damage, (1/4))))
+                poison.damage_delay = 0
+                poison.curtime = 0
+                poison.center_x = -1000
+                poison.center_y = -1000
+                poison.player = self.player
+
+                for i in range(1, 6):
+                    poison.append_texture(arcade.load_texture("images/effects/poison/" + str(i) + ".png"))
+
+                self.bullet_list.append(poison)
+                self.hit_list.append(enemy)
+
+        if self.player.player_has_skill("Singularity"):
+            nearby_enemies = self.player.getNearbyEnemies(self, int(self.range / 4))
+
+            for enemy in nearby_enemies:
+                enemy.on_take_damage(int(self.damage * 1.1), True)

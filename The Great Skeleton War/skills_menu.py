@@ -1,6 +1,7 @@
 import arcade
 import random
 import globalvars
+import spell_data
 
 SCREEN_WIDTH = 1440
 SCREEN_HEIGHT = 768
@@ -34,130 +35,12 @@ class Menu():
         self.box_message = ""
         self.box_title_color = None
 
-        self.lines_fire_x = []
-        self.lines_fire_y = []
-        self.lines_shock_x = []
-        self.lines_shock_y = []
-        self.lines_poison_x = []
-        self.lines_poison_y = []
-        self.lines_sorcery_x = []
-        self.lines_sorcery_y = []
+        self.lines_x = {}
+        self.lines_y = {}
+
         self.old_tier = 0
 
-        # Spell Data
-        self.spell_ultimate_fire_1 = ["Plasma", "Beam penetrates an unlimited amount of enemies."]
-        self.spell_ultimate_fire_2 = ["Melting", "Enemies that die from the fireball explode."]
-        self.spell_ultimate_fire_3 = ["Wildfire", "Fire length is extended to 9 blocks."]
-        self.spell_ultimates_fire = [self.spell_ultimate_fire_1, self.spell_ultimate_fire_2, self.spell_ultimate_fire_3]
-
-        self.spell_ultimate_poison_1 = ["Lethal", "10% chance for enemy to instantly die."]
-        self.spell_ultimate_poison_2 = ["Plague", "You can place up to three clouds at once."]
-        self.spell_ultimate_poison_3 = ["Eternal", "Poison only needs to be reapplied every 3 hits."]
-        self.spell_ultimates_poison = [self.spell_ultimate_poison_1, self.spell_ultimate_poison_2, self.spell_ultimate_poison_3]
-
-        self.spell_ultimate_shock_1 = ["Chain", "Lightning has 80% chance to chain to another target."]
-        self.spell_ultimate_shock_2 = ["Quantum", "Orb has a small chance to teleport and send enemies back to spawn."]
-        self.spell_ultimate_shock_3 = ["Disintegrate", "Has a small chance to deal x5 damage."]
-        self.spell_ultimates_shock = [self.spell_ultimate_shock_1, self.spell_ultimate_shock_2, self.spell_ultimate_shock_3]
-
-        self.spell_ultimate_sorcery_1 = ["Affinity", "Base mana regen rate increased."]
-        self.spell_ultimate_sorcery_2 = ["Freezing", "Enemy hit directly is paralyzed for some time."]
-        self.spell_ultimate_sorcery_3 = ["City", "Max population increased to 20."]
-        self.spell_ultimates_sorcery = [self.spell_ultimate_sorcery_1, self.spell_ultimate_sorcery_2, self.spell_ultimate_sorcery_3]
-
-        self.major_spell_fire_1 = ["Beam", "Shoots a beam of fire that penetrates enemies."]
-        self.major_spell_fire_2 = ["Fireball", "Throw a high damage fireball that ignites enemies."]
-        self.major_spell_fire_3 = ["Inferno", "Sets off a fire in front of you."]
-        self.major_spells_fire = [self.major_spell_fire_1, self.major_spell_fire_2, self.major_spell_fire_3]
-
-        self.major_spell_poison_1 = ["Dart", "Shoots a powerful dart."]
-        self.major_spell_poison_2 = ["Cloud", "Creates a plume of toxin that poisons enemies as they walk through it."]
-        self.major_spell_poison_3 = ["Venomblade", "Poisons your sword, your next slash will apply poison as well."]
-        self.major_spells_poison = [self.major_spell_poison_1, self.major_spell_poison_2, self.major_spell_poison_3]
-
-        self.major_spell_shock_1 = ["Lightning", "Shoot lightning out of your hands."]
-        self.major_spell_shock_2 = ["Orb", "Fires an unstable orb of some strange electric force."]
-        self.major_spell_shock_3 = ["Thunderstrike", "Spawns a lightning strike that does devastating damage."]
-        self.major_spells_shock = [self.major_spell_shock_1, self.major_spell_shock_2, self.major_spell_shock_3]
-
-        self.major_spell_sorcery_1 = ["Battlemage", "Passive abilities that improve melee and magic."]
-        self.major_spell_sorcery_2 = ["Burden", "Projectile that slows down the enemy in a small area."]
-        self.major_spell_sorcery_3 = ["Mysticism", "Passive abilities that influence random things."]
-        self.major_spells_sorcery = [self.major_spell_sorcery_1, self.major_spell_sorcery_2, self.major_spell_sorcery_3]
-
-        # Minor
-        self.minor_spell_fire_1_1 = ["Blistering", "Enemies hit by the beam are lit on fire."]
-        self.minor_spell_fire_1_2 = ["Searing", "Deals additional damage to enemies that are on fire."]
-        self.minor_spell_fire_1_3 = ["Hyper", "Increases damage and projectile speed of the beam."]
-        self.minor_spell_fire_1_4 = ["Reflective", "Beam has a small chance to reflect instead of expiring."]
-        self.minor_spells_fire_1 = [self.minor_spell_fire_1_1, self.minor_spell_fire_1_2, self.minor_spell_fire_1_3, self.minor_spell_fire_1_4]
-        self.minor_spell_fire_2_1 = ["Fire Blast", "Fireball explodes on contact."]
-        self.minor_spell_fire_2_2 = ["Volcanic", "Fire lasts longer."]
-        self.minor_spell_fire_2_3 = ["Potent", "Increased impact damage."]
-        self.minor_spell_fire_2_4 = ["Velocity", "Increases the projectile speed."]
-        self.minor_spells_fire_2 = [self.minor_spell_fire_2_1, self.minor_spell_fire_2_2, self.minor_spell_fire_2_3, self.minor_spell_fire_2_4]
-        self.minor_spell_fire_3_1 = ["Fueled", "Fire lasts longer."]
-        self.minor_spell_fire_3_2 = ["Decay", "The longer the enemy stands in the fire the more damage they take."]
-        self.minor_spell_fire_3_3 = ["Consuming", "Enemies killed in the fire extend its duration."]
-        self.minor_spell_fire_3_4 = ["Ash", "Fire does more damage."]
-        self.minor_spells_fire_3 = [self.minor_spell_fire_3_1, self.minor_spell_fire_3_2, self.minor_spell_fire_3_3, self.minor_spell_fire_3_4]
-        self.minor_spells_fire = [self.minor_spells_fire_1, self.minor_spells_fire_2, self.minor_spells_fire_3]
-
-        self.minor_spell_poison_1_1 = ["Debilitating", "Poison does more damage."]
-        self.minor_spell_poison_1_2 = ["Paralyzing", "Poison has chance to paralyze the enemy for the duration of the poison."]
-        self.minor_spell_poison_1_3 = ["Venom", "Poison lasts longer."]
-        self.minor_spell_poison_1_4 = ["Penetrating", "Dart has a chance to penetrate an enemy."]
-        self.minor_spells_poison_1 = [self.minor_spell_poison_1_1, self.minor_spell_poison_1_2, self.minor_spell_poison_1_3, self.minor_spell_poison_1_4]
-        self.minor_spell_poison_2_1 = ["Expansive", "Increases area of poison cloud."]
-        self.minor_spell_poison_2_2 = ["Venomous", "Poison lingers for longer after they walk out of the cloud."]
-        self.minor_spell_poison_2_3 = ["Noxious", "Increased damage while enemies are in the cloud."]
-        self.minor_spell_poison_2_4 = ["Caustic", "Enemies exposed to the poison are lit on fire."]
-        self.minor_spells_poison_2 = [self.minor_spell_poison_2_1, self.minor_spell_poison_2_2, self.minor_spell_poison_2_3, self.minor_spell_poison_2_4]
-        self.minor_spell_poison_3_1 = ["Lasting", "Poison lasts longer."]
-        self.minor_spell_poison_3_2 = ["Necrotic Siphon", "Enemies killed by the poison regen your mana."]
-        self.minor_spell_poison_3_3 = ["Frailty", "Deals additional damage equal to 2% of the enemies max health."]
-        self.minor_spell_poison_3_4 = ["Hebenon", "Poison slows the enemy down."]
-        self.minor_spells_poison_3 = [self.minor_spell_poison_3_1, self.minor_spell_poison_3_2, self.minor_spell_poison_3_3, self.minor_spell_poison_3_4]
-        self.minor_spells_poison = [self.minor_spells_poison_1, self.minor_spells_poison_2, self.minor_spells_poison_3]
-
-        self.minor_spell_shock_1_1 = ["Voltage", "Higher impact damage."]
-        self.minor_spell_shock_1_2 = ["Amplitude", "Increases velocity and damage."]
-        self.minor_spell_shock_1_3 = ["Energized", "For each enemy hit returns 20% of mana used when it was cast."]
-        self.minor_spell_shock_1_4 = ["Rapid", "Increases casting speed."]
-        self.minor_spells_shock_1 = [self.minor_spell_shock_1_1, self.minor_spell_shock_1_2, self.minor_spell_shock_1_3, self.minor_spell_shock_1_4]
-        self.minor_spell_shock_2_1 = ["Stabilized", "Path of the energy ball is more stable."]
-        self.minor_spell_shock_2_2 = ["Energetic", "Shocks enemies more rapidly."]
-        self.minor_spell_shock_2_3 = ["Static", "Increases damage of the shock."]
-        self.minor_spell_shock_2_4 = ["Scorn", "Allows two orbs to exist at the same time."]
-        self.minor_spells_shock_2 = [self.minor_spell_shock_2_1, self.minor_spell_shock_2_2, self.minor_spell_shock_2_3, self.minor_spell_shock_2_4]
-        self.minor_spell_shock_3_1 = ["Powerful", "Increases area of explosion."]
-        self.minor_spell_shock_3_2 = ["Supercell", "Small chance to strike again."]
-        self.minor_spell_shock_3_3 = ["Smiting", "Increases damage of strike."]
-        self.minor_spell_shock_3_4 = ["Fiery", "Small chance to light enemies on fire."]
-        self.minor_spells_shock_3 = [self.minor_spell_shock_3_1, self.minor_spell_shock_3_2, self.minor_spell_shock_3_3, self.minor_spell_shock_3_4]
-        self.minor_spells_shock = [self.minor_spells_shock_1, self.minor_spells_shock_2, self.minor_spells_shock_3]
-
-        self.minor_spell_sorcery_1_1 = ["Siphon", "Melee damage regens mana."]
-        self.minor_spell_sorcery_1_2 = ["Beserk", "Melee damage increased."]
-        self.minor_spell_sorcery_1_3 = ["Frenzy", "Decreases delay between spell casts and melee swings."]
-        self.minor_spell_sorcery_1_4 = ["Mastery", "Reduces mana cost of all spells."]
-        self.minor_spells_sorcery_1 = [self.minor_spell_sorcery_1_1, self.minor_spell_sorcery_1_2, self.minor_spell_sorcery_1_3, self.minor_spell_sorcery_1_4]
-        self.minor_spell_sorcery_2_1 = ["Broaden", "Increased area of effect."]
-        self.minor_spell_sorcery_2_2 = ["Enduring", "Slowness lasts longer."]
-        self.minor_spell_sorcery_2_3 = ["Slug", "Increased slow amount."]
-        self.minor_spell_sorcery_2_4 = ["Diminishing", "Slow amount increases on high speed enemies."]
-        self.minor_spells_sorcery_2 = [self.minor_spell_sorcery_2_1, self.minor_spell_sorcery_2_2, self.minor_spell_sorcery_2_3, self.minor_spell_sorcery_2_4]
-        self.minor_spell_sorcery_3_1 = ["Fleet", "Faster movement speed"]
-        self.minor_spell_sorcery_3_2 = ["Lucrative", "You gain additional money from kills."]
-        self.minor_spell_sorcery_3_3 = ["Bargain", "You get more money back from selling towers."]
-        self.minor_spell_sorcery_3_4 = ["Necromancy", "You regain a population at the start of every wave."]
-        self.minor_spells_sorcery_3 = [self.minor_spell_sorcery_3_1, self.minor_spell_sorcery_3_2, self.minor_spell_sorcery_3_3, self.minor_spell_sorcery_3_4]
-        self.minor_spells_sorcery = [self.minor_spells_sorcery_1, self.minor_spells_sorcery_2, self.minor_spells_sorcery_3]
-
-        self.minor_spells = [self.minor_spells_fire, self.minor_spells_poison, self.minor_spells_shock, self.minor_spells_sorcery]
-        self.major_spells = [self.major_spells_fire, self.major_spells_poison, self.major_spells_shock, self.major_spells_sorcery]
-        self.ultimates = [self.spell_ultimates_fire, self.spell_ultimates_poison, self.spell_ultimates_shock, self.spell_ultimates_sorcery]
-        self.spells = [self.major_spells, self.minor_spells, self.ultimates]
+        self.spells = spell_data.spells
 
         self.setup()
 
@@ -214,76 +97,71 @@ class Menu():
         self.display_box = False
         self.box_title = ""
         self.box_message = ""
+        self.box_subtitle = ""
         self.box_title_color = None
+        self.box_ultfix = False
 
-        source = []
-        rands = [1, 2, 3, 4]
-        for i in range(4):
-            choice = random.choice(rands)
-            source.append(choice)
-            rands.remove(choice)
+        # Select two random casting spells and one random passive spell to show up in the menu:
+        # source_pool = self.spells.copy()
+        source_pool = []
+        passive_spells = []
 
-        for i in range(len(source)):
+        for i in range(len(self.spells)):
+            if self.spells[i][0] == "passive":
+                passive_spells.append(self.spells[i])
+            else:
+                source_pool.append(self.spells[i])
+
+        choice = random.choice(passive_spells)
+
+        for i in range(3):
             item = Node()
             item.tier = 0
-            if i == 0:
-                item.data = arcade.load_texture("images/UI/fire/fire.png")
-                item.type = "fire"
-            elif i == 1:
-                item.data = arcade.load_texture("images/UI/shock/shock.png")
-                item.type = "shock"
-            elif i == 2:
-                item.data = arcade.load_texture("images/UI/poison/poison.png")
-                item.type = "poison"
-            elif i == 3:
-                item.data = arcade.load_texture("images/UI/sorcery/sorcery.png")
-                item.type = "sorcery"
+            item.data = arcade.load_texture(choice[5][0])
+            item.type = choice[0]
 
-            item.xpos = self.calc_source_pos("x", source[i])
-            item.ypos = self.calc_source_pos("y", source[i])
-            item.quadrant = source[i]
+            item.xpos = self.calc_source_pos("x", i + 1)
+            item.ypos = self.calc_source_pos("y", i + 1)
+            item.quadrant = i + 1
             item.st_x = item.xpos
             item.st_y = item.ypos
             item.unlocked = True
             item.purchased = False
             item.radius = 16
             item.ultimate = False
+            item.complete = False
             item.nodes = []
 
             item.spell_index = 0
-            item.title = ""
-            item.desc = ""
+            item.title = choice[1]
+            item.desc = choice[2]
 
-            item.spell_index = random.randint(0, len(self.major_spells_fire) - 1)
-            if item.type == "fire":
-                temp = self.major_spells_fire[item.spell_index]
-            elif item.type == "poison":
-                temp = self.major_spells_poison[item.spell_index]
-            elif item.type == "shock":
-                temp = self.major_spells_shock[item.spell_index]
-            elif item.type == "sorcery":
-                temp = self.major_spells_sorcery[item.spell_index]
-            else:
-                print("What happened?")
-            item.title = temp[0]
-            item.desc = temp[1]
+            item.ult_data = arcade.load_texture("images/UI/ultimate.png")
+            item.ult_title = choice[4][0]
+            item.ult_desc = choice[4][1]
+
+            item.spell_ref = choice
 
             self.sources.append(item)
 
-        self.sources.pop(random.randint(0, len(self.sources) - 1))
+            choice = random.choice(source_pool)
+            source_pool.remove(choice)
 
-        for source in self.sources:
+        # For these three spells, set up their skills.
+        for cur_spell in self.sources:
             local_tier = 0
-            # Generate regular nodes
-            for i in range(random.randint(2, 4)):
+
+            skill_pool = cur_spell.spell_ref[3].copy()
+
+            for i in range(random.randint(3, 4)):
                 local_tier += 1
 
                 node = Node()
-                node.quadrant = source.quadrant
+                node.quadrant = cur_spell.quadrant
                 node.st_x = 0
                 node.st_y = 0
-                node.data = arcade.load_texture("images/UI/" + source.type + "/node.png")
-                node.type = source.type
+                node.data = arcade.load_texture(cur_spell.spell_ref[5][1])
+                node.type = cur_spell.type
                 # node.tier = local_tier
                 node.xpos = 200
                 node.ypos = 200
@@ -291,88 +169,20 @@ class Menu():
                 node.purchased = False
                 node.radius = 8
                 node.ultimate = False
+                node.source_spell = cur_spell
 
-                source.nodes.append(node)
-                self.calc_node_pos(node, source)
+                cur_spell.nodes.append(node)
+                self.calc_node_pos(node, cur_spell)
 
-                node.title = ""
-                node.desc = ""
-                temp_1 = None
-                if node.type == "fire":
-                    temp_1 = self.minor_spells_fire[source.spell_index]
-                    # temp_1 = random.choice(self.minor_spells_fire)
-                elif node.type == "poison":
-                    temp_1 = self.minor_spells_poison[source.spell_index]
-                elif node.type == "shock":
-                    temp_1 = self.minor_spells_shock[source.spell_index]
-                elif node.type == "sorcery":
-                    temp_1 = self.minor_spells_sorcery[source.spell_index]
-                else:
-                    print("What happened?")
-
-                selected = random.choice(temp_1)
-                error_count = 0
-                while self.already_exists(selected):
-                    selected = random.choice(temp_1)
-                    error_count += 1
-                    if error_count > 100:
-                        print("Something went horribly wrong!")
-                        break
-
+                selected = random.choice(skill_pool)
                 node.title = selected[0]
                 node.desc = selected[1]
-
-            # Generate ultimates
-            if random.randint(1 + local_tier, 7) == 7:
-                node = Node()
-                node.quadrant = source.quadrant
-                node.st_x = 0
-                node.st_y = 0
-                node.data = arcade.load_texture("images/UI/ultimate.png")
-                node.type = source.type
-                # node.tier = source.nodes[-1].tier + 1
-                node.xpos = 200
-                node.ypos = 200
-                node.unlocked = False
-                node.purchased = False
-                node.radius = 8
-                node.ultimate = True
-
-                node.title = ""
-                node.desc = ""
-                if node.type == "fire":
-                    # temp = random.choice(self.spell_ultimates_fire)
-                    temp = self.spell_ultimates_fire[source.spell_index]
-                elif node.type == "poison":
-                    temp = self.spell_ultimates_poison[source.spell_index]
-                elif node.type == "shock":
-                    temp = self.spell_ultimates_shock[source.spell_index]
-                elif node.type == "sorcery":
-                    temp = self.spell_ultimates_sorcery[source.spell_index]
-                else:
-                    print("What happened?")
-                node.title = temp[0]
-                node.desc = temp[1]
-
-                source.nodes.append(node)
-                self.calc_node_pos(node, source)
-
-
+                skill_pool.remove(selected)
 
         # Add source to the line lists
         for source in self.sources:
-            if source.type == "fire":
-                self.lines_fire_x.append(source.xpos)
-                self.lines_fire_y.append(source.ypos)
-            if source.type == "shock":
-                self.lines_shock_x.append(source.xpos)
-                self.lines_shock_y.append(source.ypos)
-            if source.type == "poison":
-                self.lines_poison_x.append(source.xpos)
-                self.lines_poison_y.append(source.ypos)
-            if source.type == "sorcery":
-                self.lines_sorcery_x.append(source.xpos)
-                self.lines_sorcery_y.append(source.ypos)
+            self.lines_x[source.title] = [source.xpos]
+            self.lines_y[source.title] = [source.ypos]
 
     def already_exists(self, chosen_spell):
         exists = False
@@ -384,19 +194,9 @@ class Menu():
 
         return exists
 
-    def add_line_data(self, element, xpos, ypos):
-        if element == "fire":
-            self.lines_fire_x.append(xpos)
-            self.lines_fire_y.append(ypos)
-        if element == "shock":
-            self.lines_shock_x.append(xpos)
-            self.lines_shock_y.append(ypos)
-        if element == "poison":
-            self.lines_poison_x.append(xpos)
-            self.lines_poison_y.append(ypos)
-        if element == "sorcery":
-            self.lines_sorcery_x.append(xpos)
-            self.lines_sorcery_y.append(ypos)
+    def add_line_data(self, title, xpos, ypos):
+        self.lines_x[title].append(xpos)
+        self.lines_y[title].append(ypos)
 
     def draw_connection(self, element_x, element_y):
         for i in range(len(element_x)):
@@ -404,29 +204,52 @@ class Menu():
                 arcade.draw_line(element_x[i], element_y[i], element_x[i+1], element_y[i+1], arcade.color.WHITE)
 
     def draw(self):
+        # Draw backgrounds, etc.
         arcade.start_render()
         arcade.draw_texture_rectangle(SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2, SCREEN_WIDTH, SCREEN_HEIGHT, self.background)
         arcade.draw_texture_rectangle(50, SCREEN_HEIGHT - 50, 60, 60, self.exit_button)
         arcade.draw_text(str(globalvars.player.skillpoints), 39, SCREEN_HEIGHT - 120, (73, 42, 230), 32)
 
+        # If hovering over a node, display information.
         if self.display_box:
-            arcade.draw_text(str(self.box_title), 50, 100, self.box_title_color, 32)
+            arcade.draw_text(str(self.box_title), 49, 110, self.box_title_color, 32)
+
             char_calc = round(16 - (len(self.box_message) / 6))
             if char_calc < 0:
                 char_calc = 0
+
             size = 14 + char_calc
-            arcade.draw_text(str(self.box_message), 50, 50, (255, 255, 255), size)
+            arcade.draw_text(str(self.box_message), 50, 75, (255, 255, 255), size)
 
-        self.draw_connection(self.lines_fire_x, self.lines_fire_y)
-        self.draw_connection(self.lines_shock_x, self.lines_shock_y)
-        self.draw_connection(self.lines_poison_x, self.lines_poison_y)
-        self.draw_connection(self.lines_sorcery_x, self.lines_sorcery_y)
+            local_subtitle = self.box_subtitle[0].upper() + self.box_subtitle[1:]
 
+            arcade.draw_text(local_subtitle, 50, 40, self.box_title_color, 16)
+
+        # Draw lines between the nodes.
+        for line_type in self.lines_x:
+            self.draw_connection(self.lines_x[line_type], self.lines_y[line_type])
+
+        # Draw the nodes
         for source in self.sources:
-            arcade.draw_texture_rectangle(source.xpos, source.ypos, 32, 32, source.data)
+            if source.ultimate:
+                arcade.draw_circle_filled(source.xpos, source.ypos, 18, (122, 18, 130, random.randint(0, 255)))
+                arcade.draw_texture_rectangle(source.xpos, source.ypos, 32, 32, source.data)
+
+                if self.box_ultfix:
+                    self.box_title_color = (122, 18, 130, random.randint(100, 255))
+            else:
+                if globalvars.skills_ultimate and source.complete:
+                    arcade.draw_texture_rectangle(source.xpos, source.ypos, 32, 32, source.ult_data)
+                else:
+                    arcade.draw_texture_rectangle(source.xpos, source.ypos, 32, 32, source.data)
+
             if not source.purchased:
                 arcade.draw_circle_filled(source.xpos, source.ypos, 16, (200, 200, 200, 100))
+
             for node in source.nodes:
+                if source.ultimate:
+                    arcade.draw_circle_filled(node.xpos, node.ypos, 10, (177, 32, 188, random.randint(0, 255)))
+
                 if node.unlocked:
                     arcade.draw_texture_rectangle(node.xpos, node.ypos, 16, 16, node.data)
                     if not node.purchased:
@@ -441,12 +264,32 @@ class Menu():
 
             for source in self.sources:
                 if globalvars.player.skillpoints > 0:
-                    if (source.xpos - source.radius) < x < (source.xpos + source.radius) and (source.ypos - source.radius) < y < (source.ypos + source.radius) and not source.purchased:
-                        source.purchased = True
-                        source.nodes[0].unlocked = True
-                        globalvars.player.skillpoints -= 1
-                        globalvars.emit_sound("source_select.ogg")
-                        globalvars.player.give_spell(source.title)
+                    if (source.xpos - source.radius) < x < (source.xpos + source.radius) and (source.ypos - source.radius) < y < (source.ypos + source.radius):
+                        if globalvars.skills_ultimate and source.complete and source.purchased:
+                            source.ultimate = True
+                            globalvars.player.skillpoints -= 1
+                            globalvars.emit_sound("ult_choose.ogg")
+                            globalvars.player.give_skill(source.ult_title)
+                            globalvars.skills_ultimate = False
+
+                            if globalvars.player.player_has_skill("Vitality") and globalvars.player.player_has_skill("Fleet"):
+                                globalvars.player.speed += 1
+
+                            if globalvars.player.player_has_skill("Vitality") and globalvars.player.player_has_skill("City"):
+                                globalvars.population *= 2
+                                globalvars.max_population *= 2
+
+                            if globalvars.player.player_has_skill("Vitality") and globalvars.player.player_has_skill("Mage"):
+                                globalvars.player.mana_cap = int(globalvars.player.mana_cap * 1.5)
+                                globalvars.player.mana = globalvars.player.mana_cap
+
+                        elif not source.purchased:
+                            source.purchased = True
+                            source.nodes[0].unlocked = True
+                            globalvars.player.skillpoints -= 1
+                            globalvars.emit_sound("source_select.ogg")
+                            globalvars.player.give_spell(source.title)
+
                     for i in range(len(source.nodes)):
                         node = source.nodes[i]
                         if (node.xpos - node.radius) < x < (node.xpos + node.radius) and (node.ypos - node.radius) < y < (node.ypos + node.radius) and not node.purchased and node.unlocked:
@@ -458,33 +301,48 @@ class Menu():
                                 globalvars.player.speed += 1
 
                             if node.title == "City":
-                                globalvars.population = 20
-                                globalvars.max_population = 20
+                                globalvars.population *= 2
+                                globalvars.max_population *= 2
+
+                            if node.title == "Mage":
+                                globalvars.player.mana_cap = int(globalvars.player.mana_cap * 1.5)
+                                globalvars.player.mana = globalvars.player.mana_cap
 
                             node.purchased = True
-                            self.add_line_data(node.type, node.xpos, node.ypos)
+                            self.add_line_data(source.title, node.xpos, node.ypos)
                             if i < len(source.nodes) - 1:
                                 source.nodes[i + 1].unlocked = True
+                            else:
+                                source.complete = True
+                if globalvars.skills_ultimate and globalvars.player.skillpoints <= 0:
+                    globalvars.skills_ultimate = False
 
     def move_mouse(self, x, y):
         self.display_box = False
+
+        local_ultfix = False
+
         for source in self.sources:
             rad = source.radius * 1.5
+
             if (source.xpos - rad) < x < (source.xpos + rad) and (source.ypos - rad) < y < (source.ypos + rad):
                 self.display_box = True
-                self.box_title = source.title
-                self.box_message = source.desc
 
-                color = (255, 255, 255)
-                if source.type == "fire":
-                    color = (210, 30, 30)
-                elif source.type == "shock":
-                    color = (62, 167, 224)
-                elif source.type == "poison":
-                    color = (15, 210, 40)
-                elif source.type == "sorcery":
-                    color = (245, 255, 66)
-                self.box_title_color = color
+                if source.ultimate:
+                    self.box_title = "Ultimate " + source.title
+                    self.box_message = source.ult_desc
+                    local_ultfix = True
+                elif globalvars.skills_ultimate and source.complete:
+                    self.box_title = source.ult_title
+                    self.box_message = source.ult_desc
+                    self.box_title_color = (122, 18, 130, 255)
+                else:
+                    self.box_title = source.title
+                    self.box_message = source.desc
+                    self.box_title_color = source.spell_ref[5][2]
+
+                self.box_subtitle = source.type + " spell"
+
             for i in range(len(source.nodes)):
                 node = source.nodes[i]
                 rad = node.radius * 1.5
@@ -492,28 +350,8 @@ class Menu():
                     self.display_box = True
                     self.box_title = node.title
                     self.box_message = node.desc
+                    self.box_title_color = node.source_spell.spell_ref[5][2]
+                    self.box_subtitle = node.type + " skill"
+                    local_ultfix = False
 
-                    color = (255, 255, 255)
-                    if node.ultimate:
-                        color = (122, 18, 130, random.randint(200, 255))
-                    else:
-                        if node.type == "fire":
-                            color = (210, 30, 30)
-                        elif node.type == "shock":
-                            color = (62, 167, 224)
-                        elif node.type == "poison":
-                            color = (15, 210, 40)
-                        elif node.type == "sorcery":
-                            color = (245, 255, 66)
-                    self.box_title_color = color
-
-"""
-Every game the following shows up in the galaxy (it's completely random)
-One major skill from 3 random categories
-2-4 minor skills for that major skill
-10% for an ultimate to show up for that major skill
-"""
-
-
-
-
+        self.box_ultfix = local_ultfix

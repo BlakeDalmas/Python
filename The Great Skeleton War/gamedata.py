@@ -21,11 +21,11 @@ class Skeleton(arcade.Sprite):
         self.node_tracker = 1
         self.ticks_until_tile = 0
         self.node_direction = None
-        self.damage_floaters = []
         self.floater_timer = []
         self.worth = 0
         self.fire_weakness = 1
         self.invincible = False
+        self.death_floaters = []
 
         self.health_gate = 0
         self.old_health = 0
@@ -36,7 +36,15 @@ class Skeleton(arcade.Sprite):
         self.ignite = 0
         self.ignite_timer = 0
 
-    def spawn_floater(self, damage):
+        self.poisoned = None
+
+    def spawn_floater(self, damage, death_floater):
+        if self.cur_floater is not None:
+            damage = self.cur_floater.damage + damage
+        else:
+            self.floater_randpos_x = random.randint(-16, 16)
+            self.floater_randpos_y = random.randint(-16, 16)
+
         color = (0, 0, 0)
 
         if damage <= 0:
@@ -60,42 +68,63 @@ class Skeleton(arcade.Sprite):
             size = 10
 
         floater = arcade.create_text(str(damage), color, size)
-        floater.x_pos = self.center_x + random.randint(-16, 16)
-        floater.y_pos = self.center_y + random.randint(-16, 16)
+        floater.x_pos = self.center_x + self.floater_randpos_x
+        floater.y_pos = self.center_y + self.floater_randpos_y
         floater.die_time = 3
-        self.damage_floaters.append(floater)
+        floater.damage = damage
+        self.cur_floater = floater
+
+        if death_floater:
+            self.death_floaters.append(floater)
 
     def give_exp(self, damage, attacker_is_player):
-        exp = damage / 100
+        exp = damage / globalvars.dv_xpscale[globalvars.difficulty]
+
         if attacker_is_player:
             exp = exp * 2
         else:
             exp = exp / 2
+
         globalvars.player.give_exp(exp)
 
-    def on_take_damage(self, damage, attacker_is_player):
-        self.give_exp(damage, attacker_is_player)
+    def process_damage(self, damage, attacker_is_player):
+        damage_taken = damage
 
-        self.spawn_floater(damage)
+        if damage_taken > self.health:
+            damage_taken = self.health
 
-        globalvars.stats_total_dmg += damage
+        self.give_exp(damage_taken, attacker_is_player)
+
+        self.spawn_floater(damage, self.health - damage <= 0)
+
+        globalvars.stats_total_dmg += damage_taken
         if attacker_is_player:
-            globalvars.stats_player_dmg += damage
+            globalvars.stats_player_dmg += damage_taken
 
         self.health -= damage
+
         if self.health <= 0:
             globalvars.stats_kills += 1
             self.give_money()
-            self.kill()
             globalvars.emit_sound("skeleton_die.ogg")
-        # else:
-        #     globalvars.emit_sound("hitsound_" + str(random.randint(1, 5)) + ".ogg")
+
+            # globalvars.enemy_list.remove(self)
+
+            # self.remove_from_sprite_lists()
+
+            self.kill()
+
+    def on_take_damage(self, damage, attacker_is_player):
+        self.process_damage(damage, attacker_is_player)
 
     def give_money(self):
         amount = self.worth
 
         if globalvars.player.player_has_skill("Lucrative"):
             amount = int(self.worth * 1.25)
+
+            if globalvars.player.player_has_skill("Vitality"):
+                amount = int(self.worth * 1.25)
 
         globalvars.money += amount
         globalvars.stats_money += amount
@@ -167,21 +196,9 @@ class Skeleton(arcade.Sprite):
 class Hyperskeleton(Skeleton):
     def on_take_damage(self, damage, attacker_is_player):
         if self.invincible:
-            damage = 0
+            self.process_damage(0, attacker_is_player)
         else:
-            self.give_exp(damage, attacker_is_player)
-
-        globalvars.stats_total_dmg += damage
-        if attacker_is_player:
-            globalvars.stats_player_dmg += damage
-
-        self.spawn_floater(damage)
-        self.health -= damage
-        if self.health <= 0:
-            globalvars.stats_kills += 1
-            self.give_money()
-            self.kill()
-
+            self.process_damage(damage, attacker_is_player)
 
     def tick(self):
         if self.invincible:
@@ -192,6 +209,7 @@ class Hyperskeleton(Skeleton):
         if self.node_tracker > self.tiles:
             self.invincible = False
             self.speed = 1
+            self.set_speed = 1
 
 
 class Raptor(Skeleton):
@@ -204,17 +222,23 @@ class Raptor(Skeleton):
 
 class Lich(Skeleton):
     def on_take_damage(self, damage, attacker_is_player):
-        self.give_exp(damage, attacker_is_player)
-        self.spawn_floater(damage)
+        damage_taken = damage
+
+        if damage_taken > self.health:
+            damage_taken = self.health
+
+        self.give_exp(damage_taken, attacker_is_player)
+
+        self.spawn_floater(damage, self.health - damage <= 0)
 
         if self.shield > 0:
             self.set_texture(6)
         else:
             self.set_texture(7)
 
-        globalvars.stats_total_dmg += damage
+        globalvars.stats_total_dmg += damage_taken
         if attacker_is_player:
-            globalvars.stats_player_dmg += damage
+            globalvars.stats_player_dmg += damage_taken
 
         self.health -= damage
         self.shield -= damage
@@ -242,24 +266,11 @@ class Lich(Skeleton):
 
 class Skeleton_Lord(Skeleton):
     def on_take_damage(self, damage, attacker_is_player):
-
         if damage > self.health_gate:
             damage = self.health_gate
 
-        self.give_exp(damage, attacker_is_player)
+        self.process_damage(damage, attacker_is_player)
 
-        self.spawn_floater(damage)
-
-        globalvars.stats_total_dmg += damage
-        if attacker_is_player:
-            globalvars.stats_player_dmg += damage
-
-        self.health -= damage
-        if self.health <= 0:
-            globalvars.stats_kills += 1
-            self.give_money()
-            self.kill()
-            globalvars.emit_sound("skeleton_die.ogg")
 
     def tick(self):
         self.curtime += 1
@@ -279,7 +290,6 @@ class Tower(arcade.Sprite):
     def _init_(self):
         super().__init__()
         self.attack_radius = 0
-        self.enemy_list = None
         self.bullet_list = None
         self.damage = 0
         self.fire_rate = 0
@@ -299,6 +309,11 @@ class Tower(arcade.Sprite):
         self.ng_x = None
         self.ng_y = None
 
+        self.price = 0
+
+        self.detect_delay = 0 # You don't need to check for enemies every frame.
+        # This new system needs to be applied to the wizard, the horse, and the rock.
+
     def update(self):
         self.curtime += 1
 
@@ -312,7 +327,7 @@ class Tower(arcade.Sprite):
         return None
 
     def check_shoot(self):
-        if not self.can_shoot and self.curtime > self.delay_wait:
+        if not self.can_shoot and float(self.curtime) > self.delay_wait:
             self.can_shoot = True
 
     def animation(self):
@@ -321,17 +336,33 @@ class Tower(arcade.Sprite):
         else:
             self.set_texture(0)
 
+    def random_variance(self, value, perc):
+        scale = (perc / 100) * value
+        variance = scale * random.random()
+
+        if random.random() > 0.5:
+            variance *= -1
+
+        return value + variance
+
+    def get_nearest_enemy(self, radius):
+        for enemy in globalvars.enemy_list:
+            hyper_check = enemy.name == "hyperskeleton" and enemy.invincible
+            bound_check = (((self.center_x - enemy.center_x) ** 2) + ((self.center_y - enemy.center_y) ** 2)) <= radius ** 2
+
+            if enemy is not None and not hyper_check and bound_check:
+                return enemy
+
+        return None
+
     def detect_enemy(self):
-        for enemy in self.enemy_list:
+        if float(self.curtime) > self.detect_delay:
+            self.detect_delay = self.curtime + 0.25
 
-            hyper_check = False
-            if enemy.name == "hyperskeleton":
-                if enemy.invincible == True:
-                    hyper_check = True
+            nearest_enemy = self.get_nearest_enemy(self.attack_radius)
 
-            if (((self.center_x - enemy.center_x) ** 2) + ((self.center_y - enemy.center_y) ** 2)) <= self.attack_radius ** 2 and not hyper_check:
-                if self.can_shoot:
-                    self.attack(enemy)
+            if self.can_shoot and nearest_enemy is not None:
+                self.attack(nearest_enemy)
 
     def shoot_bullet(self, enemy, image, velocity, tower_angle, bullet_angle, radius, animation_timer):
         globalvars.emit_sound("stone_throw.ogg")
@@ -340,7 +371,10 @@ class Tower(arcade.Sprite):
         start_y = self.center_y
         bullet.center_x = start_x
         bullet.center_y = start_y
+        bullet.curtime = 0
+        bullet.check_delay = 0
         local_speed = velocity
+        bullet.delay_speed = 8 / local_speed
 
         dest_x = enemy.center_x
         dest_y = enemy.center_y
@@ -351,6 +385,8 @@ class Tower(arcade.Sprite):
 
         self.angle = math.degrees(angle) + tower_angle
 
+        angle = self.random_variance(angle, 2)
+
         bullet.angle = math.degrees(angle) + bullet_angle
 
         bullet.change_x = math.cos(angle) * local_speed
@@ -358,7 +394,7 @@ class Tower(arcade.Sprite):
 
         bullet.animation_timer = animation_timer
 
-        bullet.enemy_list = self.enemy_list
+        bullet.enemy_list = globalvars.enemy_list
         bullet.damage = self.damage
         bullet.attack_radius = radius
         self.bullet_list.append(bullet)
@@ -366,7 +402,7 @@ class Tower(arcade.Sprite):
     def attack(self, enemy):
         self.animation_wait = self.curtime + 10
         self.can_shoot = False
-        self.delay_wait = self.curtime + (self.fire_rate * 60) + random.randint(1, 3)
+        self.delay_wait = self.curtime + (self.random_variance(self.fire_rate, 5) * 60)
         self.shoot_bullet(enemy, "images/TD/entities/projectile/rock.png", 10, -90, 0, 25, 0)
 
 
@@ -399,7 +435,7 @@ class Tower_Stone_Person_1(Tower):
     def attack(self, enemy):
         self.animation_wait = self.curtime + 10
         self.can_shoot = False
-        self.delay_wait = self.curtime + (self.fire_rate * 60)
+        self.delay_wait = self.curtime + (self.random_variance(self.fire_rate, 5) * 60)
         x_diff = enemy.center_x - self.center_x
         y_diff = enemy.center_y - self.center_y
         angle = math.atan2(y_diff, x_diff)
@@ -419,7 +455,7 @@ class Tower_Stone_Person_3(Tower):
     def attack(self, enemy):
         globalvars.emit_sound("blowgun.ogg")
         self.can_shoot = False
-        self.delay_wait = self.curtime + (self.fire_rate * 60)
+        self.delay_wait = self.curtime + (self.random_variance(self.fire_rate, 5) * 60)
         self.shoot_bullet(enemy, "images/TD/entities/projectile/blowdart.png", 20, -90, -90, 30, 0)
 
 
@@ -460,7 +496,7 @@ class Tower_Stone_Boulder(Tower):
                 self.center_x = SCREEN_WIDTH + 64
 
     def detect_enemy(self):
-        for enemy in self.enemy_list:
+        for enemy in globalvars.enemy_list:
             if (((self.center_x - enemy.center_x) ** 2) + ((self.center_y - enemy.center_y) ** 2)) <= self.attack_radius ** 2:
                 enemy.on_take_damage(self.damage, False)
 
@@ -484,7 +520,7 @@ class Tower_Stone_Money(Tower):
     def tick(self):
         if self.curtime > 30:
             globalvars.emit_sound("mine.ogg")
-            self.curtime = 0
+            self.curtime = random.randint(0, 2)
             globalvars.money += self.damage
             globalvars.stats_money += self.damage
 
@@ -502,7 +538,7 @@ class Tower_Stone_Super(Tower):
         globalvars.emit_sound("atlatle.ogg")
         self.animation_wait = self.curtime + 10
         self.can_shoot = False
-        self.delay_wait = self.curtime + (self.fire_rate * 60)
+        self.delay_wait = self.curtime + (self.random_variance(self.fire_rate, 5) * 60)
         self.shoot_bullet(enemy, "images/TD/entities/projectile/atlatl_dart.png", 15, -90, -90, 25, 0)
 
 
@@ -622,7 +658,7 @@ class Tower_Medieval_Special(Tower):
             elif self.animation_wait > 10:
                 self.set_texture(5)
 
-        for enemy in self.enemy_list:
+        for enemy in globalvars.enemy_list:
             if (((self.center_x - enemy.center_x) ** 2) + ((self.center_y - enemy.center_y) ** 2)) <= self.attack_radius ** 2:
                 enemy.on_take_damage(self.damage, False)
 
@@ -660,7 +696,7 @@ class Tower_Medieval_Super(Tower):
     def attack(self, enemy):
         globalvars.emit_sound("lightning_cast.ogg")
         self.can_shoot = False
-        self.delay_wait = self.curtime + (self.fire_rate * 60)
+        self.delay_wait = self.curtime + (self.random_variance(self.fire_rate, 5) * 60)
         bullet = Projectile("images/TD/entities/towers/medieval/shock/shock_1.png")
         bullet.append_texture(
             arcade.load_texture("images/TD/entities/towers/medieval/shock/shock_2.png"))
@@ -672,7 +708,10 @@ class Tower_Medieval_Super(Tower):
         start_y = self.center_y
         bullet.center_x = start_x
         bullet.center_y = start_y
+        bullet.curtime = 0
+        bullet.check_delay = 0
         local_speed = 10
+        bullet.delay_speed = 8 / local_speed
 
         dest_x = enemy.center_x
         dest_y = enemy.center_y
@@ -690,14 +729,14 @@ class Tower_Medieval_Super(Tower):
         bullet.change_x = math.cos(angle) * local_speed
         bullet.change_y = math.sin(angle) * local_speed
 
-        bullet.enemy_list = self.enemy_list
+        bullet.enemy_list = globalvars.enemy_list
         bullet.damage = self.damage
         bullet.attack_radius = 25
         self.bullet_list.append(bullet)
 
 
     def detect_enemy(self):
-        for enemy in self.enemy_list:
+        for enemy in globalvars.enemy_list:
 
             hyper_check = False
             if enemy.name == "hyperskeleton":
@@ -745,13 +784,13 @@ class Tower_Industrial_Trap(Tower):
         if self.curtime > self.uses and self.uses != 0:
             self.delay_wait = 1
 
-        for detect in self.enemy_list:
+        for detect in globalvars.enemy_list:
             if (((self.center_x - detect.center_x) ** 2) + ((self.center_y - detect.center_y) ** 2)) <= self.attack_radius ** 2 and self.uses == 0:
                 self.uses = self.curtime + 20
                 self.set_texture(1)
 
         if self.delay_wait == 1:
-            for enemy in self.enemy_list:
+            for enemy in globalvars.enemy_list:
                 if (((self.center_x - enemy.center_x) ** 2) + ((self.center_y - enemy.center_y) ** 2)) <= self.attack_radius ** 2:
                     enemy.on_take_damage(self.damage, False)
                     if self.can_shoot:
@@ -797,7 +836,7 @@ class Tower_Industrial_Person_1(Tower):
             self.reloading = False
             self.can_shoot = False
             self.set_texture(0)
-            self.delay_wait = self.curtime + (self.fire_rate * 60)
+            self.delay_wait = self.curtime + (self.random_variance(self.fire_rate, 5) * 60)
 
         if self.curtime == self.animation_wait and not self.reloading:
             self.set_texture(2)
@@ -810,7 +849,7 @@ class Tower_Industrial_Person_1(Tower):
             self.set_texture(1)
             self.animation_wait = self.curtime + 20
             self.can_shoot = False
-            self.delay_wait = self.curtime + (self.fire_rate * 60)
+            self.delay_wait = self.curtime + (self.random_variance(self.fire_rate, 5) * 60)
             self.last_shot_delay = self.curtime + random.randint(90, 110)
 
             self.shots -= 1
@@ -840,9 +879,12 @@ class Tower_Industrial_Person_1(Tower):
                 bullet.change_x = math.cos(adj_angle) * local_speed
                 bullet.change_y = math.sin(adj_angle) * local_speed
                 bullet.animation_timer = 0
-                bullet.enemy_list = self.enemy_list
+                bullet.enemy_list = globalvars.enemy_list
                 bullet.damage = self.damage
                 bullet.attack_radius = 25
+                bullet.curtime = 0
+                bullet.check_delay = 0
+                bullet.delay_speed = 8 / local_speed
                 self.bullet_list.append(bullet)
 
 
@@ -866,7 +908,7 @@ class Tower_Industrial_Person_2(Tower):
                 self.reloading = False
                 self.reload_delay = 0
                 self.shots = 30
-                self.delay_wait = self.curtime + 30
+                self.delay_wait = self.curtime + self.random_variance(30, 5)
             elif self.reload_delay > 30:
                 self.set_texture(2)
             elif self.reload_delay > 20:
@@ -882,7 +924,7 @@ class Tower_Industrial_Person_2(Tower):
             self.set_texture(1)
             self.animation_wait = self.curtime + 5
             self.can_shoot = False
-            self.delay_wait = self.curtime + (self.fire_rate * 60)
+            self.delay_wait = self.curtime + (self.random_variance(self.fire_rate, 5) * 60)
             self.last_shot_delay = self.curtime + random.randint(90, 110)
 
             self.shots -= 1
@@ -910,9 +952,12 @@ class Tower_Industrial_Person_2(Tower):
             bullet.change_x = math.cos(adj_angle) * local_speed
             bullet.change_y = math.sin(adj_angle) * local_speed
             bullet.animation_timer = 0
-            bullet.enemy_list = self.enemy_list
+            bullet.enemy_list = globalvars.enemy_list
             bullet.damage = self.damage
             bullet.attack_radius = 25
+            bullet.curtime = 0
+            bullet.check_delay = 0
+            bullet.delay_speed = 8 / local_speed
             self.bullet_list.append(bullet)
 
 
@@ -934,7 +979,7 @@ class Tower_Industrial_Person_3(Tower):
                 self.reloading = False
                 self.reload_delay = 0
                 self.shots = 1
-                self.delay_wait = self.curtime + 300
+                self.delay_wait = self.curtime + self.random_variance(300, 5)
             elif self.reload_delay > 60:
                 self.set_texture(2)
             elif self.reload_delay > 50:
@@ -949,7 +994,7 @@ class Tower_Industrial_Person_3(Tower):
         # Shoot the highest health enemy on the map
         highest_health = 0
         target = None
-        for enemy in self.enemy_list:
+        for enemy in globalvars.enemy_list:
             hyper_check = False
             if enemy.name == "hyperskeleton":
                 if enemy.invincible:
@@ -968,7 +1013,7 @@ class Tower_Industrial_Person_3(Tower):
             self.set_texture(1)
             self.animation_wait = self.curtime + 5
             self.can_shoot = False
-            self.delay_wait = self.curtime + (self.fire_rate * 60)
+            self.delay_wait = self.curtime + (self.random_variance(self.fire_rate, 5) * 60)
             self.last_shot_delay = self.curtime + random.randint(350, 400)
 
             self.shots -= 1
@@ -996,9 +1041,12 @@ class Tower_Industrial_Person_3(Tower):
             bullet.change_x = math.cos(adj_angle) * local_speed
             bullet.change_y = math.sin(adj_angle) * local_speed
             bullet.animation_timer = 0
-            bullet.enemy_list = self.enemy_list
+            bullet.enemy_list = globalvars.enemy_list
             bullet.damage = self.damage
             bullet.attack_radius = 42
+            bullet.curtime = 0
+            bullet.check_delay = 0
+            bullet.delay_speed = 8 / local_speed
             self.bullet_list.append(bullet)
 
 
@@ -1067,7 +1115,7 @@ class Tower_Industrial_Special(Tower):
                     explosion.damage = self.damage
                     explosion.radius = self.attack_radius
                     explosion.exploded = False
-                    explosion.enemy_list = self.enemy_list
+                    explosion.enemy_list = globalvars.enemy_list
                     explosion.append_texture(arcade.load_texture("images/TD/effects/explosion/explosion_1.png"))
                     explosion.append_texture(arcade.load_texture("images/TD/effects/explosion/explosion_2.png"))
                     explosion.append_texture(arcade.load_texture("images/TD/effects/explosion/explosion_3.png"))
@@ -1084,7 +1132,7 @@ class Tower_Industrial_Super_Base(Tower):
     def attack(self, enemy):
         self.animation_wait = self.curtime + 10
         self.can_shoot = False
-        self.delay_wait = self.curtime + 3
+        self.delay_wait = self.curtime + self.random_variance(3, 5)
 
         globalvars.emit_sound("tank_gun.ogg")
 
@@ -1094,6 +1142,7 @@ class Tower_Industrial_Super_Base(Tower):
         bullet.center_x = start_x
         bullet.center_y = start_y
         local_speed = 25
+        bullet.delay_speed = 8 / local_speed
 
         dest_x = enemy.center_x
         dest_y = enemy.center_y
@@ -1102,14 +1151,18 @@ class Tower_Industrial_Super_Base(Tower):
         y_diff = dest_y - start_y
         angle = math.atan2(y_diff, x_diff)
 
+        angle = self.random_variance(angle, 2)
+
         bullet.angle = math.degrees(angle)
 
         bullet.animation_timer = 0
 
         bullet.change_x = math.cos(angle) * local_speed
         bullet.change_y = math.sin(angle) * local_speed
+        bullet.curtime = 0
+        bullet.check_delay = 0
 
-        bullet.enemy_list = self.enemy_list
+        bullet.enemy_list = globalvars.enemy_list
         bullet.damage = 25
         bullet.attack_radius = 25
         self.bullet_list.append(bullet)
@@ -1122,7 +1175,7 @@ class Tower_Industrial_Super(Tower):
     def attack(self, enemy):
         self.animation_wait = self.curtime + 10
         self.can_shoot = False
-        self.delay_wait = self.curtime + (self.fire_rate * 60)
+        self.delay_wait = self.curtime + (self.random_variance(self.fire_rate, 5) * 60)
 
         globalvars.emit_sound("tank_cannon_shoot.ogg")
 
@@ -1151,7 +1204,7 @@ class Tower_Industrial_Super(Tower):
         rocket.change_x = math.cos(angle) * local_speed
         rocket.change_y = math.sin(angle) * local_speed
 
-        rocket.enemy_list = self.enemy_list
+        rocket.enemy_list = globalvars.enemy_list
         rocket.damage = self.damage
         rocket.attack_radius = 25
         self.bullet_list.append(rocket)
@@ -1189,12 +1242,11 @@ class BombExplosion(arcade.Sprite):
         self.curtime = 0
         self.damage = 0
         self.radius = 0
-        self.enemy_list = None
         self.exploded = False
 
     def update(self):
         if not self.exploded:
-            for enemy in self.enemy_list:
+            for enemy in globalvars.enemy_list:
                 if (((self.center_x - enemy.center_x) ** 2) + ((self.center_y - enemy.center_y) ** 2)) <= self.radius ** 2:
                     enemy.on_take_damage(self.damage, False)
                     self.exploded = True
@@ -1222,11 +1274,13 @@ class Projectile(arcade.Sprite):
     def _init_(self):
         super().__init__()
         self.attack_radius = 10
-        self.enemy_list = None
         self.change_x = 0
         self.change_y = 0
         self.damage = 0
         self.animation_timer = 0
+        self.curtime = 0
+        self.check_delay = 0
+        self.delay_speed = 0
 
     def update(self):
         self.center_x += self.change_x
@@ -1241,22 +1295,35 @@ class Projectile(arcade.Sprite):
         if int(self.center_x) < 0 or int(self.center_x) > SCREEN_WIDTH or int(self.center_y) < 0 or int(self.center_y) > SCREEN_HEIGHT:
             self.kill()
 
-        for enemy in self.enemy_list:
-            if (((self.center_x - enemy.center_x) ** 2) + ((self.center_y - enemy.center_y) ** 2)) <= self.attack_radius ** 2:
-                enemy.on_take_damage(self.damage, False)
-                self.kill()
-                break
+        if self.curtime > self.check_delay:
+            self.check_delay = self.curtime + self.delay_speed
+
+            target_index = len(globalvars.enemy_list) - 1
+            target_found = False
+
+            while not target_found and target_index >= 0:
+                enemy = globalvars.enemy_list[target_index]
+
+                if (((self.center_x - enemy.center_x) ** 2) + (
+                            (self.center_y - enemy.center_y) ** 2)) <= self.attack_radius ** 2:
+                    target_found = True
+                    enemy.on_take_damage(self.damage, False)
+                    self.kill()
+
+                target_index = target_index - 1
+
+        self.curtime += 1
 
 
 class Missile(arcade.Sprite):
     def _init_(self):
         super().__init__()
         self.attack_radius = 10
-        self.enemy_list = None
         self.change_x = 0
         self.change_y = 0
         self.damage = 0
         self.animation_timer = 0
+        self.bullet_list = []
 
     def update(self):
         self.center_x += self.change_x
@@ -1265,7 +1332,7 @@ class Missile(arcade.Sprite):
         if 0 > int(self.center_x) > SCREEN_WIDTH or 0 > int(self.center_y) > SCREEN_HEIGHT:
             self.kill()
 
-        for enemy in self.enemy_list:
+        for enemy in globalvars.enemy_list:
             if (((self.center_x - enemy.center_x) ** 2) + ((self.center_y - enemy.center_y) ** 2)) <= self.attack_radius ** 2:
                 globalvars.emit_sound("big_explosion.ogg")
                 explosion = BombExplosion("images/TD/effects/big_explosion/explosion_1.png")
@@ -1275,7 +1342,7 @@ class Missile(arcade.Sprite):
                 explosion.damage = self.damage
                 explosion.radius = 100
                 explosion.exploded = False
-                explosion.enemy_list = self.enemy_list
+                explosion.enemy_list = globalvars.enemy_list
                 explosion.append_texture(arcade.load_texture("images/TD/effects/big_explosion/explosion_1.png"))
                 explosion.append_texture(arcade.load_texture("images/TD/effects/big_explosion/explosion_2.png"))
                 explosion.append_texture(arcade.load_texture("images/TD/effects/big_explosion/explosion_3.png"))

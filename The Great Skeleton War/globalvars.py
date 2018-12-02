@@ -2,13 +2,16 @@ import arcade
 import tempvars
 import os
 
+# Skills Menu Global Variables
+skills_opened = False
+skills_ultimate = False
+
 # Some random global variables
-money = 250
+money = 0
 population = 10
 max_population = 10
 level_text = arcade.create_text("0", [50, 64, 200], 24)
 player = None
-skills_opened = False
 
 stats_kills = 0
 stats_money = 0
@@ -22,6 +25,37 @@ left_keys = []
 right_keys = []
 slash_keys = []
 spell_keys = []
+switch1_keys = []
+switch2_keys = []
+switch3_keys = []
+pause_keys = []
+
+# Other stuff
+enemy_list = arcade.SpriteList()
+
+# Difficulty stuff
+difficulty = 0
+
+dv_win = [50000, 100000, 200000]
+dv_midage = [3000, 5000, 10000]
+dv_stoneage = [1000, 2000, 5000]
+
+dv_startingmoney = [400, 250, 0]
+dv_population = [20, 10, 5]
+dv_xpscale = [75, 100, 100]
+dv_hyperdist = [2, (4/3), (11/10)]
+
+dv_worth_skeleton = [20, 10, 5]
+dv_worth_armoredskeleton = [30, 15, 10]
+dv_worth_hyperskeleton = [25, 10, 5]
+dv_worth_raptor = [40, 20, 15]
+dv_worth_lich = [100, 50, 25]
+dv_worth_skeletonlord = [0, 2500, 2000]
+
+dv_health_raptor = [500, 750, 1000]
+dv_shield_lich = [5000, 10000, 15000]
+dv_health_lich = [1000, 2000, 2500]
+dv_health_hyperskeleton = [10, 25, 75]
 
 # Goes through the config.txt and figures out the correct key binds
 file = open("config.txt")
@@ -29,21 +63,24 @@ lines = []
 for item in file:
     lines.append(item)
 
-keys = [up_keys, down_keys, left_keys, right_keys, slash_keys, spell_keys]
+keys = [up_keys, down_keys, left_keys, right_keys, slash_keys, spell_keys, switch1_keys, switch2_keys, switch3_keys, pause_keys]
 start = 0
-for k in range(6):
-    txt = lines[k]
-
-    selected_keys = keys[k]
-    start = 0
-    for v in range(len(txt)):
-        if txt[v] == ".":
-            selected_keys.append(txt[start:v])
-            start = v + 1
 
 
-library_key = ["LAlt", "RAlt", "UP", "LEFT", "RIGHT", "DOWN", "CTRL", "LSHIFT", "RSHIFT", "CAPS", "TAB"]
-library_number = ["65513", "65514", "65362", "65361", "65363", "65364", "65508", "65505", "65505", "65509", "65289"]
+for k in range(len(keys)):
+    if k < len(lines):
+        txt = lines[k]
+
+        selected_keys = keys[k]
+        start = 0
+        for v in range(len(txt)):
+            if txt[v] == ".":
+                selected_keys.append(txt[start:v])
+                start = v + 1
+
+
+library_key = ["LAlt", "RAlt", "UP", "LEFT", "RIGHT", "DOWN", "CTRL", "LSHIFT", "RSHIFT", "CAPS", "TAB", "ONE", "TWO", "THREE", "P"]
+library_number = ["65513", "65514", "65362", "65361", "65363", "65364", "65508", "65505", "65505", "65509", "65289", "49", "50", "51", "112"]
 
 # Sounds
 """

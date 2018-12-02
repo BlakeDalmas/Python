@@ -37,6 +37,7 @@ Artwork from :
         https://opengameart.org/content/painterly-spell-icons-part-2
         https://opengameart.org/content/painterly-spell-icons-part-3
         https://opengameart.org/content/painterly-spell-icons-part-4
+        https://opengameart.org/content/ui-button-and-extra
 
     Keenney.nl:
         http://kenney.nl

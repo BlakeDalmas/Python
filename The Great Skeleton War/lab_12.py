@@ -21,7 +21,6 @@ class MyApplication(arcade.Window):
     def setup(self):
         # General
         self.player = arcade.Sprite()
-        self.damage_floaters = []
         self.main_menu_open = True
         self.game_started = False
         self.options_opened = False
@@ -37,6 +36,9 @@ class MyApplication(arcade.Window):
         self.button_generate = arcade.load_texture("images/TD/GUI/button_generate.png")
         self.button_new_start = arcade.load_texture("images/TD/GUI/new_button_start.png")
         self.button_new_generate = arcade.load_texture("images/TD/GUI/new_button_generate.png")
+        self.button_difficulty = arcade.load_texture("images/TD/GUI/difficulty.png")
+        self.button_diff_min = arcade.load_texture("images/TD/GUI/diff_min.png")
+        self.button_diff_max = arcade.load_texture("images/TD/GUI/diff_max.png")
         self.game_background = arcade.load_texture("images/TD/grass_bg_new.jpg")
         self.skeleton_texture = arcade.load_texture("images/TD/entities/skeleton_test.png")
         self.error_box = arcade.load_texture("images/UI/error_box.png")
@@ -48,6 +50,12 @@ class MyApplication(arcade.Window):
         self.curtime = 0
         self.title_image = arcade.load_texture("images/title.png")
         self.lose_switch = False
+        self.death_floaters = []
+        self.paused = False
+        self.bck_x = int(SCREEN_WIDTH / 2)
+        self.bck_y = int(SCREEN_HEIGHT / 2)
+        self.diff_open = True
+        self.enemy_list_debug = False
 
         # Backgrounds
         self.bg_switch = False
@@ -84,6 +92,8 @@ class MyApplication(arcade.Window):
         self.go_button = arcade.load_texture("images/TD/GUI/go_button.png")
         self.tower_menu_main = arcade.load_texture("images/TD/GUI/tower_gui.png")
         self.tower_menu_max = arcade.load_texture("images/TD/GUI/tower_gui_maxbutton.png")
+        self.tower_menu_age_blank = arcade.load_texture("images/TD/GUI/age_button_blank.png")
+        self.tower_menu_win_blank = arcade.load_texture("images/TD/GUI/win_button_blank.png")
         self.tower_menu_age = arcade.load_texture("images/TD/GUI/age_button.png")
         self.tower_menu_age2 = arcade.load_texture("images/TD/GUI/age_button_2.png")
         self.tower_menu_age3 = arcade.load_texture("images/TD/GUI/age_button_3.png")
@@ -533,7 +543,7 @@ class MyApplication(arcade.Window):
         self.all_sprites_list = arcade.SpriteList()
         self.floor_list = arcade.SpriteList()
         self.wall_list = arcade.SpriteList()
-        self.enemy_list = arcade.SpriteList()
+        # globalvars.enemy_list = arcade.SpriteList()
         self.tower_list = arcade.SpriteList()
         self.bullet_list = arcade.SpriteList()
         def cords_inside_map(cord_x, cord_y):
@@ -975,7 +985,6 @@ class MyApplication(arcade.Window):
         self.all_sprites_list.append(wall)
         self.wall_list.append(wall)
 
-
     def on_draw(self):
         arcade.start_render()
 
@@ -1001,27 +1010,51 @@ class MyApplication(arcade.Window):
             arcade.draw_texture_rectangle(SCREEN_WIDTH - 64, SCREEN_HEIGHT - 64, 64, 64, self.gear_button)
             arcade.draw_texture_rectangle(475, 675, 900, 100, self.title_image)
         else:
-            arcade.draw_texture_rectangle(int(SCREEN_WIDTH / 2), int(SCREEN_HEIGHT / 2), SCREEN_WIDTH, SCREEN_HEIGHT, self.game_background)
+            arcade.draw_texture_rectangle(self.bck_x, self.bck_y, SCREEN_WIDTH, SCREEN_HEIGHT, self.game_background)
+
         if not self.main_menu_open and not self.game_started:
             self.all_sprites_list.draw()
 
-            difficulty = ""
-            color = (0, 0, 0)
-            if self.blocks_created >= 150:
-                difficulty = "Easy"
-                color = (46, 232, 52)
-            if self.blocks_created < 150:
-                difficulty = "Normal"
-                color = (214, 211, 32)
-            if self.blocks_created < 100:
-                difficulty = "Hard"
-                color = (237, 151, 23)
-            if self.blocks_created < 60:
-                difficulty = "Very Hard"
-                color = (209, 20, 20)
+            if self.diff_open:
+                arcade.draw_texture_rectangle(50, SCREEN_HEIGHT - 25, 42, 16, self.button_diff_min)
 
-            arcade.draw_text("Difficulty:", 25, 725, (0, 0, 0), 24)
-            arcade.draw_text(difficulty, 165, 725, color, 24)
+                arcade.draw_texture_rectangle(150, SCREEN_HEIGHT - 350, 190, 350, self.button_difficulty)
+
+                difficulty = ""
+                color = (0, 0, 0)
+                if self.blocks_created >= 150:
+                    difficulty = "Easy"
+                    color = (46, 232, 52)
+                if self.blocks_created < 150:
+                    difficulty = "Normal"
+                    color = (214, 211, 32)
+                if self.blocks_created < 100:
+                    difficulty = "Hard"
+                    color = (237, 151, 23)
+                if self.blocks_created < 60:
+                    difficulty = "Very Hard"
+                    color = (209, 20, 20)
+
+                arcade.draw_text("Map Difficulty:", 25, 700, (0, 0, 0), 24)
+                arcade.draw_text(difficulty, 235, 700, color, 24)
+
+                arcade.draw_text("War Difficulty:", 25, 650, (0, 0, 0), 24)
+
+                arcade.draw_text("Select War Difficulty", 22, 600, (75, 0, 0), 24, bold=True)
+
+                diff_text = "Normal"
+                color = (214, 211, 32)
+
+                if globalvars.difficulty == 1:
+                    diff_text = "Hard"
+                    color = (237, 151, 23)
+                elif globalvars.difficulty == 2:
+                    diff_text = "NIGHTMARE"
+                    color = (209, 20, 20)
+
+                arcade.draw_text(diff_text, 235, 650, color, 24)
+            else:
+                arcade.draw_texture_rectangle(50, SCREEN_HEIGHT - 25, 42, 16, self.button_diff_max)
 
             arcade.draw_circle_filled(self.debug_x - self.tilesize_half, self.debug_y - self.tilesize_half, 16, (50, 50, 200, 175))
             arcade.draw_texture_rectangle(int(SCREEN_WIDTH / 2) + 150, 75, 200, 100, self.button_new_start)
@@ -1031,15 +1064,44 @@ class MyApplication(arcade.Window):
             self.wall_list.draw()
             self.bullet_list.draw()
             self.tower_list.draw()
-            self.enemy_list.draw()
+            globalvars.enemy_list.draw()
             self.player.draw()
+
+            # By commenting out globalvars.enemy_list.draw() and placing enemy.draw in the Damage Floaters loop, you could save some
+            # efficiency. However, this will force the following two situations:
+            # A) Have all the enemies render above the player
+            # B) Have all the damage floaters render under the player
+            # In order to have both of these render above the player, it must be done this way:
+
+            # Damage Floaters
+            for enemy in globalvars.enemy_list:
+                floater = enemy.cur_floater
+
+                if floater is not None:
+                    arcade.render_text(floater, floater.x_pos, floater.y_pos)
+                    floater.die_time -= .1
+
+                    if floater.die_time <= 0:
+                        enemy.cur_floater = None
+
+            # Death Floaters
+            for floater in self.death_floaters:
+                arcade.render_text(floater, floater.x_pos, floater.y_pos)
+                floater.die_time -= .1
+
+                if floater.die_time <= 0:
+                    self.death_floaters.remove(floater)
 
             arcade.draw_texture_rectangle(50, SCREEN_HEIGHT - 50, 60, 60, self.skills_button)
             arcade.draw_texture_rectangle(50, SCREEN_HEIGHT - 120, 60, 60, self.spells_button)
 
-            if self.spell_select_open and len(self.player.spell_icon_list) > 0:
-                for i in range(len(self.player.spell_icon_list)):
-                    arcade.draw_texture_rectangle(50, (SCREEN_HEIGHT - 190) - (i * 70), 60, 60, self.player.spell_icon_list[i])
+            # Spell Select Display
+            if len(self.player.spell_icon_list) > 0:
+                if self.spell_select_open:
+                    for i in range(len(self.player.spell_icon_list)):
+                        arcade.draw_texture_rectangle(50, (SCREEN_HEIGHT - 190) - (i * 70), 60, 60, self.player.spell_icon_list[i])
+                elif self.player.current_spell_icon is not None:
+                    arcade.draw_texture_rectangle(125, SCREEN_HEIGHT - 120, 60, 60, self.player.current_spell_icon)
 
             # If player has available skillpoints put a flashing number on the skills button.
             if self.player.skillpoints > 0:
@@ -1074,21 +1136,15 @@ class MyApplication(arcade.Window):
                 arcade.render_text(globalvars.level_text, SCREEN_WIDTH - 104, SCREEN_HEIGHT - 50)
 
                 right = 1272 + (144 * (self.player.exp_cur / self.player.exp_cap))
+
+                if right < 1272:
+                    right = 1272
+
                 arcade.draw_lrtb_rectangle_filled(1272, right, 748, 740, (50, 64, 200))
                 for i in range(9):
                     arcade.draw_rectangle_outline(SCREEN_WIDTH - 160 + (16 * i), SCREEN_HEIGHT - 24, 16, 8, (0, 0, 0))
             else:
                 arcade.render_text(globalvars.level_text, SCREEN_WIDTH - 112, SCREEN_HEIGHT - 42)
-
-            for i in range(len(self.damage_floaters)):
-                if len(self.damage_floaters) > 0:
-                    floater = self.damage_floaters[i]
-                    arcade.render_text(floater, floater.x_pos, floater.y_pos)
-                    floater.die_time -= .1
-
-            for item in self.damage_floaters:
-                if item.die_time <= 0:
-                    self.damage_floaters.remove(item)
 
             if self.countdown < self.countdown_bound:
                 arcade.draw_texture_rectangle((SCREEN_WIDTH / 2) - 24, SCREEN_HEIGHT - 128, 128, 24, self.go_button)
@@ -1111,8 +1167,13 @@ class MyApplication(arcade.Window):
                         my = self.current_mouse_y
                         if (mx - 20) < int(towers.center_x) < (mx + 20) and (my - 20) < int(towers.center_y) < (my + 20):
                             amount = int(towers.price / 4)
+
                             if self.player.player_has_skill("Bargain"):
                                 amount = int(towers.price / 2)
+
+                                if self.player.player_has_skill("Vitality"):
+                                    amount = towers.price - int(towers.price / 10)
+
                             arcade.draw_text("$"+str(amount), mx, my, (0, 100, 0), 12)
 
             if self.placing_tower:
@@ -1166,14 +1227,25 @@ class MyApplication(arcade.Window):
 
             if self.tower_menu_open and not self.placing_tower and (self.countdown != self.countdown_bound or self.wave == 0):
                 arcade.draw_texture_rectangle(int(SCREEN_WIDTH / 2), 64, SCREEN_WIDTH, 128, self.tower_menu_main)
+
+                # new age button
+                if self.age == "industrial":
+                    arcade.draw_texture_rectangle(SCREEN_WIDTH - 375, 54, 160, 80, self.tower_menu_win_blank)
+                else:
+                    arcade.draw_texture_rectangle(SCREEN_WIDTH - 375, 54, 160, 80, self.tower_menu_age_blank)
+
+                local_age_money = 0
+
                 if self.age == "stone":
-                    arcade.draw_texture_rectangle(SCREEN_WIDTH - 375, 54, 160, 80, self.tower_menu_age)
+                    local_age_money = globalvars.dv_stoneage[globalvars.difficulty]
+
                     for stone in range(len(self.tower_data)):
                         arcade.draw_texture_rectangle(64 + (64 * stone) + (64 * stone), 64, 48, 64, self.tower_menu_button_stone[stone])
                         if self.tower_data[stone].price > globalvars.money:
                             arcade.draw_rectangle_filled(64 + (64 * stone) + (64 * stone), 64, 48, 64, (180, 20, 40, 100))
                 if self.age == "medieval":
-                    arcade.draw_texture_rectangle(SCREEN_WIDTH - 375, 54, 160, 80, self.tower_menu_age2)
+                    local_age_money = globalvars.dv_midage[globalvars.difficulty]
+
                     for stone in range(len(self.tower_data)):
                         loc_x = 64 + (64 * stone) + (64 * stone)
                         txt_x = loc_x - 16
@@ -1184,7 +1256,8 @@ class MyApplication(arcade.Window):
                         if self.tower_data[stone].price > globalvars.money:
                             arcade.draw_rectangle_filled(64 + (64 * stone) + (64 * stone), 64, 48, 64, (180, 20, 40, 100))
                 if self.age == "industrial":
-                    arcade.draw_texture_rectangle(SCREEN_WIDTH - 375, 54, 160, 80, self.tower_menu_age3)
+                    local_age_money = globalvars.dv_win[globalvars.difficulty]
+
                     for stone in range(len(self.tower_data)):
                         loc_x = 64 + (64 * stone) + (64 * stone)
                         txt_x = loc_x - 16
@@ -1194,6 +1267,9 @@ class MyApplication(arcade.Window):
                         arcade.draw_text("$"+str(self.tower_data[stone].price), txt_x, 34, (0, 0, 0, 255), 11)
                         if self.tower_data[stone].price > globalvars.money:
                             arcade.draw_rectangle_filled(64 + (64 * stone) + (64 * stone), 64, 48, 64, (180, 20, 40, 100))
+
+                arcade.draw_text("$" + str(local_age_money), SCREEN_WIDTH - 445, 27, (0, 0, 0, 255), 20, align="left")
+
             elif not self.placing_tower and (self.countdown != self.countdown_bound or self.wave == 0):
                 arcade.draw_texture_rectangle(67, 13, 134, 26, self.tower_menu_max)
             arcade.draw_text("$" + str(globalvars.money), SCREEN_WIDTH - 270, 60, (10, 0, 0), 20)
@@ -1246,26 +1322,11 @@ class MyApplication(arcade.Window):
             arcade.draw_texture_rectangle(SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2, 960, 512, self.options_screen)
 
             # If the number has an ASCII value find its associated key, otherwise see if the number represents a key in an array I made.
-            for i in range(6):
+            for i in range(len(globalvars.keys)):
                 seq = globalvars.keys[i]
                 result = ""
                 for num in seq:
-                    char = ""
-                    use_library = False
-                    try:
-                        char = chr(int(num))
-                        if int(num) > 200:
-                            use_library = True
-                    except:
-                        char = ""
-
-                    if num == "32":
-                        char = "SPACEBAR"
-
-                    if use_library:
-                        for k in range(len(globalvars.library_number)):
-                            if globalvars.library_number[k] == num:
-                                char = globalvars.library_key[k]
+                    char = self.get_key_string(num)
 
                     if len(result) > 0:
                         result = result + " / " + char
@@ -1273,7 +1334,10 @@ class MyApplication(arcade.Window):
                         result = result + char
 
                 # Display the keys bound
-                arcade.draw_text(result, 455, 585 - (i * 54), (255, 255, 255), 16)
+                if i < 6:
+                    arcade.draw_text(result, 455, 585 - (i * 54), (255, 255, 255), 16)
+                else:
+                    arcade.draw_text(result, 750, 585 - ((i - 6) * 54), (255, 255, 255), 16)
 
             if self.key_listening:
                 arcade.draw_text("Press the key you want to bind this to", (SCREEN_WIDTH / 2) - 190, 170, (255, 255, 255), 18)
@@ -1282,6 +1346,47 @@ class MyApplication(arcade.Window):
                 if len(item) < 1:
                     arcade.draw_text("You cannot apply until all keys have been bound!", (SCREEN_WIDTH / 2) - 190, 200, (255, 30, 30), 18)
 
+        if self.paused:
+            arcade.draw_text("[PAUSED]", (SCREEN_WIDTH / 2) - 140, (SCREEN_HEIGHT / 2), (163, 22, 17), 50)
+            arcade.draw_text("Press " + str(self.get_key_string(globalvars.keys[9][0])).upper() + " To Resume", (SCREEN_WIDTH / 2) - 140, (SCREEN_HEIGHT / 2) - 50, (0, 0, 0), 25)
+
+        # if self.enemy_list_debug:
+        #     ex_debug = 0
+        #
+        #     if len(globalvars.enemy_list) > 0:
+        #         lch = globalvars.enemy_list[0]
+        #         arcade.draw_rectangle_filled(lch.center_x, lch.center_y, 32, 32, (0, 100, 0, 100))
+        #
+        #     for enemy in globalvars.enemy_list:
+        #         arcade.draw_text(str(enemy.health) + " -> " + str(enemy), 250, 650 - (ex_debug * 15), (0, 0, 0), 16)
+        #         ex_debug += 1
+        #
+        #     ex_index = 0
+        #
+        #     for enemy in globalvars.enemy_list:
+        #         arcade.draw_text(str(ex_index), enemy.center_x, enemy.center_y - 16, (0, 0, 0), 16)
+        #         ex_index += 1
+
+    def get_key_string(self, num):
+        char = ""
+        use_library = False
+
+        try:
+            char = chr(int(num))
+            if int(num) > 200:
+                use_library = True
+        except:
+            char = ""
+
+        if num == "32":
+            char = "SPACEBAR"
+
+        if use_library:
+            for k in range(len(globalvars.library_number)):
+                if globalvars.library_number[k] == num:
+                    char = globalvars.library_key[k]
+
+        return char
 
     def display_errorbox(self, message):
         self.errorbox_timer = self.curtime + 30
@@ -1309,10 +1414,15 @@ class MyApplication(arcade.Window):
                     self.age = "industrial"
         elif code == "killall":
             self.cheating = True
-            for enemy in self.enemy_list:
+
+            nearby_enemies = self.player.getNearbyEnemies(self.player, 19208)
+
+            for enemy in nearby_enemies:
                 enemy.health = 0
                 enemy.on_take_damage(10, False)
                 enemy.kill()
+        elif code == "detectiontest":
+            globalvars.enemy_list[0].kill()
         elif code == "endwave":
             self.cheating = True
             self.enemy_queue = []
@@ -1332,7 +1442,7 @@ class MyApplication(arcade.Window):
                 sprite.angle = random.randint(1, 360)
                 sprite.center_x = random.randint(0, SCREEN_WIDTH)
                 sprite.center_y = random.randint(0, SCREEN_HEIGHT)
-            for enemy in self.enemy_list:
+            for enemy in globalvars.enemy_list:
                 enemy.speed = 10
                 enemy.angle = random.randint(1, 360)
                 enemy.center_x = self.player.center_x
@@ -1353,6 +1463,8 @@ class MyApplication(arcade.Window):
             self.player.speed = 5
             globalvars.money = 1000000
             globalvars.population = 1000000
+        elif code == "enemy debug":
+            self.enemy_list_debug = not self.enemy_list_debug
         elif code[:14] == "player.levelup":
             self.cheating = True
             level = code[15:]
@@ -1446,6 +1558,8 @@ class MyApplication(arcade.Window):
         if self.game_started:
             self.current_mouse_x = x
             self.current_mouse_y = y
+            self.player.current_mouse_x = x
+            self.player.current_mouse_y = y
 
     def on_key_press(self, key, modifiers):
         if self.key_listening:
@@ -1454,7 +1568,12 @@ class MyApplication(arcade.Window):
 
         if self.game_started:
             if not self.cheat_menu:
-                self.player.key_press(key, modifiers)
+                for item in globalvars.keys[9]:
+                    if str(item) == str(key):
+                        self.paused = not self.paused
+
+                if not self.paused:
+                    self.player.key_press(key, modifiers)
             else:
                 if key == 65293:    # If Enter insert the code
                     self.cheat_code(self.cheat_text)
@@ -1479,12 +1598,18 @@ class MyApplication(arcade.Window):
     def restart(self):
         self.setup()
         self.main_menu_open = True
-        globalvars.population = 10
-        globalvars.money = 250
-        globalvars.max_population = 10
+        globalvars.money = globalvars.dv_startingmoney[globalvars.difficulty]
+        globalvars.max_population = globalvars.dv_population[globalvars.difficulty]
+        globalvars.population = globalvars.max_population
+        globalvars.enemy_list = arcade.SpriteList()
+        self.player = None
+        globalvars.level_text = arcade.create_text("0", [50, 64, 200], 24)
         self.lose_switch = False
 
     def on_mouse_press(self, x, y, button, modifiers):
+        if self.paused:
+            return None
+
         if globalvars.population <= 0 or self.win:
             if SCREEN_WIDTH - 250 < x < SCREEN_WIDTH - 150 and 50 < y < 150:
                 self.restart()
@@ -1504,8 +1629,13 @@ class MyApplication(arcade.Window):
                                 globalvars.emit_sound("tower_sell.ogg")
                                 towers.kill()
                                 buyback = int(towers.price / 4)
+
                                 if self.player.player_has_skill("Bargain"):
                                     buyback = int(towers.price / 2)
+
+                                    if self.player.player_has_skill("Vitality"):
+                                        buyback = towers.price - int(towers.price / 10)
+
                                 globalvars.money += buyback
 
             if button == arcade.MOUSE_BUTTON_LEFT:
@@ -1519,24 +1649,39 @@ class MyApplication(arcade.Window):
                     # Spell Menu
                     if self.spell_select_open:
                         for i in range(len(self.player.spell_icon_list)):
-                            if 10 < x < 80 and (SCREEN_HEIGHT - 150) - ((i + 1) * 70) < y < (SCREEN_HEIGHT - 85) - ((i + 1) * 70):
-                                if self.player.spell_list[i] != "Battlemage" and self.player.spell_list[i] != "Mysticism":
-                                    globalvars.emit_sound("click.ogg")
-                                    self.player.selected_spell = self.player.spell_list[i]
-                                    self.spell_select_open = False
-                                else:
-                                    self.display_errorbox("Cannot select a passive spell")
+                            local_bounds = 10 < x < 80 and (SCREEN_HEIGHT - 150) - ((i + 1) * 70) < y < (SCREEN_HEIGHT - 85) - ((i + 1) * 70)
+
+                            if local_bounds:
+                                globalvars.emit_sound("click.ogg")
+
+                                adj_list = self.player.spell_list.copy()
+                                local_done = False
+
+                                while not local_done:
+                                    local_finished = True
+
+                                    for item in adj_list:
+                                        if item[0] == "passive":
+                                            adj_list.remove(item)
+                                            local_finished = False
+                                            break
+
+                                    local_done = local_finished
+
+                                self.player.selected_spell = adj_list[i]
+                                self.player.current_spell_icon = self.player.spell_icon_list[i]
+                                self.spell_select_open = False
 
                     # Skills and spells buttons
                     if not self.placing_tower:
                         if 10 < x < 80 and SCREEN_HEIGHT - 70 < y < SCREEN_HEIGHT - 10:
-                            globalvars.emit_sound("skill_open.ogg")
                             # Open skills screen
+                            globalvars.emit_sound("skill_open.ogg")
                             globalvars.skills_opened = True
                         elif 10 < x < 80 and SCREEN_HEIGHT - 150 < y < SCREEN_HEIGHT - 85:
+                            # Open spell menu
                             globalvars.emit_sound("click.ogg")
                             self.spell_select_open = not self.spell_select_open
-                            # Open spell menu
 
                     # Placing tower
                     if self.placing_tower and self.countdown != self.countdown_bound:
@@ -1556,20 +1701,20 @@ class MyApplication(arcade.Window):
                         # Next age buttons
                         if 980 < x < 1150 and 0 < y < 128:
                             if self.age == "industrial":
-                                if globalvars.money >= 100000:
+                                if globalvars.money >= globalvars.dv_win[globalvars.difficulty]:
                                     globalvars.emit_sound("victory.ogg")
                                     self.win = True
                             if self.age == "medieval":
-                                if globalvars.money >= 5000:
+                                if globalvars.money >= globalvars.dv_midage[globalvars.difficulty]:
                                     globalvars.emit_sound("next_age.ogg")
                                     self.age = "industrial"
-                                    globalvars.money -= 5000
+                                    globalvars.money -= globalvars.dv_midage[globalvars.difficulty]
                                     self.setup_towerdata("industrial")
                             if self.age == "stone":
-                                if globalvars.money >= 2000:
+                                if globalvars.money >= globalvars.dv_stoneage[globalvars.difficulty]:
                                     globalvars.emit_sound("next_age.ogg")
                                     self.age = "medieval"
-                                    globalvars.money -= 2000
+                                    globalvars.money -= globalvars.dv_stoneage[globalvars.difficulty]
                                     self.setup_towerdata("medieval")
 
                         # Tower buttons
@@ -1631,8 +1776,19 @@ class MyApplication(arcade.Window):
                                 self.key_listening = True
                                 self.selected_key = i
                             elif 275 < x < 310 and 575 - (i * 54) < y < 615 - (i * 54):
-                                globalvars.emit_sound("click.ogg")
+                                globalvars.emit_sound("click2.ogg")
                                 globalvars.keys[i] = []
+
+                        # Select Spell 1-3 Buttons
+                        # 1 = 49, 2 = 50, 3 = 51
+                        for i in range(4):
+                            if 620 < x < 725 and 575 - (i * 54) < y < 615 - (i * 54):
+                                globalvars.emit_sound("click.ogg")
+                                self.key_listening = True
+                                self.selected_key = i + 6
+                            elif 570 < x < 600 and 575 - (i * 54) < y < 615 - (i * 54):
+                                globalvars.emit_sound("click2.ogg")
+                                globalvars.keys[i + 6] = []
 
                         # Reset to defaults button
                         if 255 < x < 475 and 230 < y < 280:
@@ -1643,9 +1799,15 @@ class MyApplication(arcade.Window):
                             globalvars.right_keys = ["100", "65363"]
                             globalvars.slash_keys = ["32"]
                             globalvars.spell_keys = ["65513", "65514"]
+                            globalvars.switch1_keys = ["49"]
+                            globalvars.switch2_keys = ["50"]
+                            globalvars.switch3_keys = ["51"]
+                            globalvars.pause_keys = ["112"]
 
                             globalvars.keys = [globalvars.up_keys, globalvars.down_keys, globalvars.left_keys,
-                                               globalvars.right_keys, globalvars.slash_keys, globalvars.spell_keys]
+                                               globalvars.right_keys, globalvars.slash_keys, globalvars.spell_keys,
+                                               globalvars.switch1_keys, globalvars.switch2_keys, globalvars.switch3_keys,
+                                               globalvars.pause_keys]
 
                         # Apply button
                         if 255 < x < 415 and 160 < y < 210:
@@ -1672,6 +1834,26 @@ class MyApplication(arcade.Window):
 
                 # If you're in the map preview screen
                 if not self.main_menu_open and not self.game_started:
+                    # Hide Button (Difficulty Menu)
+                    local_y = SCREEN_HEIGHT - 15
+                    if 30 < x < 75 and local_y - 20 < y < local_y:
+                        globalvars.emit_sound("click.ogg")
+                        self.diff_open = not self.diff_open
+
+                    # Difficulty Menu
+                    if self.diff_open:
+                        if 50 < x < 250 and 525 < y < 575:
+                            globalvars.emit_sound("click.ogg")
+                            globalvars.difficulty = 0
+
+                        if 50 < x < 250 and 400 < y < 470:
+                            globalvars.emit_sound("click.ogg")
+                            globalvars.difficulty = 1
+
+                        if 50 < x < 250 and 250 < y < 325:
+                            globalvars.emit_sound("click.ogg")
+                            globalvars.difficulty = 2
+
                     # If the user clicks the Generate button.
                     if 475 < x < 650 and 25 < y < 125:
                         globalvars.emit_sound("click.ogg")
@@ -1680,6 +1862,10 @@ class MyApplication(arcade.Window):
                     # If the user clicks the start button.
                     if 775 < x < 950 and 25 < y < 125:
                         globalvars.emit_sound("startgame.ogg")
+
+                        globalvars.money = globalvars.dv_startingmoney[globalvars.difficulty]
+                        globalvars.max_population = globalvars.dv_population[globalvars.difficulty]
+                        globalvars.population = globalvars.max_population
                         self.game_started = True
                         self.countdown = self.countdown_bound + 5
 
@@ -1705,11 +1891,12 @@ class MyApplication(arcade.Window):
                         self.player.debug = 0
                         self.player.walk_delay = 0
                         self.player.old_direction = "right"
-                        self.player.enemy_list = self.enemy_list
+                        self.player.enemy_list = globalvars.enemy_list
                         self.player.skillpoints = 0
                         self.player.spell_list = []
                         self.player.skill_list = []
                         self.player.spell_icon_list = []
+                        self.player.current_spell_icon = None
                         self.player.selected_spell = ""
                         self.player.bullet_list = self.bullet_list
                         self.player.mana = 0
@@ -1722,6 +1909,10 @@ class MyApplication(arcade.Window):
                         self.player.orb_list = []
                         self.player.surged = False
                         self.player.step_switch = False
+                        self.player.current_mouse_x = 0
+                        self.player.current_mouse_y = 0
+                        self.player.active_mm = None
+                        self.player.pcloud = None
 
                         # Manually setting up the idle animations
                         self.player.append_texture(arcade.load_texture("images/char/stand/left/1.png"))
@@ -1748,20 +1939,25 @@ class MyApplication(arcade.Window):
             enemy.set_speed = 1
             enemy.health = 100
             enemy.center_x = 48
-            enemy.worth = 10
+            enemy.worth = globalvars.dv_worth_skeleton[globalvars.difficulty]
             enemy.center_y = (self.doorpos * self.tilesize) - self.tilesize_half
             enemy.ng_x = self.node_graph_x
             enemy.ng_y = self.node_graph_y
             enemy.node_tracker = 1
             enemy.ticks_until_tile = 0
             enemy.node_direction = self.node_direction
-            enemy.damage_floaters = self.damage_floaters
+            enemy.cur_floater = None
+            enemy.death_floaters = self.death_floaters
+            enemy.floater_randpos_x = random.randint(-16, 16)
+            enemy.floater_randpos_y = random.randint(-16, 16)
             enemy.ignite = 0
             enemy.ignite_timer = 0
             enemy.fire_weakness = 1
             enemy.invincible = False
             enemy.anim_timer = 0
-            self.enemy_list.append(enemy)
+            enemy.enemy_list = globalvars.enemy_list
+            enemy.poisoned = None
+            globalvars.enemy_list.append(enemy)
         elif enemy_name == "armored_skeleton":
             enemy = gamedata.Skeleton(self.skeletons_armored[random.randint(0, 1)])
             enemy.name = enemy_name
@@ -1769,19 +1965,23 @@ class MyApplication(arcade.Window):
             enemy.set_speed = .75
             enemy.health = 300
             enemy.center_x = 48
-            enemy.worth = 15
+            enemy.worth = globalvars.dv_worth_armoredskeleton[globalvars.difficulty]
             enemy.center_y = (self.doorpos * self.tilesize) - self.tilesize_half
             enemy.ng_x = self.node_graph_x
             enemy.ng_y = self.node_graph_y
             enemy.node_tracker = 1
             enemy.ticks_until_tile = 0
             enemy.node_direction = self.node_direction
-            enemy.damage_floaters = self.damage_floaters
+            enemy.cur_floater = None
+            enemy.death_floaters = self.death_floaters
+            enemy.floater_randpos_x = random.randint(-16, 16)
+            enemy.floater_randpos_y = random.randint(-16, 16)
             enemy.ignite = 0
             enemy.ignite_timer = 0
             enemy.fire_weakness = 1
             enemy.invincible = False
-            self.enemy_list.append(enemy)
+            enemy.poisoned = None
+            globalvars.enemy_list.append(enemy)
         elif enemy_name == "hyperskeleton":
             enemy = gamedata.Hyperskeleton("images/TD/entities/skeletons/hyperskeleton/hyperskeleton_base.png")
             enemy.name = enemy_name
@@ -1793,53 +1993,62 @@ class MyApplication(arcade.Window):
             local_speed = local_tiles / 10
             enemy.speed = local_speed
             enemy.set_speed = enemy.speed
-            enemy.tiles = int(local_tiles / 2) + random.randint(-3, 3)
+            # enemy.tiles = int(local_tiles / 2) + random.randint(-3, 3)
+            enemy.tiles = int(local_tiles / globalvars.dv_hyperdist[globalvars.difficulty]) - random.randint(1, 5)
             enemy.invincible = True
-            enemy.health = 25
+            enemy.health = globalvars.dv_health_hyperskeleton[globalvars.difficulty]
             enemy.center_x = 48
-            enemy.worth = 10
+            enemy.worth = globalvars.dv_worth_hyperskeleton[globalvars.difficulty]
             enemy.center_y = (self.doorpos * self.tilesize) - self.tilesize_half
             enemy.ng_x = self.node_graph_x
             enemy.ng_y = self.node_graph_y
             enemy.node_tracker = 1
             enemy.ticks_until_tile = 0
             enemy.node_direction = self.node_direction
-            enemy.damage_floaters = self.damage_floaters
+            enemy.cur_floater = None
+            enemy.death_floaters = self.death_floaters
+            enemy.floater_randpos_x = random.randint(-16, 16)
+            enemy.floater_randpos_y = random.randint(-16, 16)
             enemy.ignite = 0
             enemy.ignite_timer = 0
             enemy.fire_weakness = 1
+            enemy.poisoned = None
             for item in self.skeletons_hyper:
                 enemy.append_texture(item)
-            self.enemy_list.append(enemy)
+            globalvars.enemy_list.append(enemy)
         elif enemy_name == "raptor":
             enemy = gamedata.Raptor("images/TD/entities/skeletons/raptor.png")
             enemy.name = enemy_name
             enemy.curtime = 0
             enemy.speed = .5
             enemy.set_speed = .5
-            enemy.health = 750
+            enemy.health = globalvars.dv_health_raptor[globalvars.difficulty]
             enemy.center_x = 48
-            enemy.worth = 20
+            enemy.worth = globalvars.dv_worth_raptor[globalvars.difficulty]
             enemy.center_y = (self.doorpos * self.tilesize) - self.tilesize_half
             enemy.ng_x = self.node_graph_x
             enemy.ng_y = self.node_graph_y
             enemy.node_tracker = 1
             enemy.ticks_until_tile = 0
             enemy.node_direction = self.node_direction
-            enemy.damage_floaters = self.damage_floaters
+            enemy.cur_floater = None
+            enemy.death_floaters = self.death_floaters
+            enemy.floater_randpos_x = random.randint(-16, 16)
+            enemy.floater_randpos_y = random.randint(-16, 16)
             enemy.ignite = 0
             enemy.ignite_timer = 0
             enemy.fire_weakness = 1
             enemy.invincible = False
-            self.enemy_list.append(enemy)
+            enemy.poisoned = None
+            globalvars.enemy_list.append(enemy)
         elif enemy_name == "lich":
             enemy = gamedata.Lich("images/TD/entities/skeletons/lich.png")
             enemy.name = enemy_name
             enemy.curtime = 0
             enemy.speed = 1
             enemy.set_speed = 1
-            enemy.health = 2000
-            enemy.shield = 10000
+            enemy.health = globalvars.dv_health_lich[globalvars.difficulty]
+            enemy.shield = globalvars.dv_shield_lich[globalvars.difficulty]
 
             local_tiles = 0
             for unused in self.floor_list:
@@ -1851,21 +2060,25 @@ class MyApplication(arcade.Window):
             enemy.health_switch = False
 
             enemy.center_x = 48
-            enemy.worth = 50
+            enemy.worth = globalvars.dv_worth_lich[globalvars.difficulty]
             enemy.center_y = (self.doorpos * self.tilesize) - self.tilesize_half
             enemy.ng_x = self.node_graph_x
             enemy.ng_y = self.node_graph_y
             enemy.node_tracker = 1
             enemy.ticks_until_tile = 0
             enemy.node_direction = self.node_direction
-            enemy.damage_floaters = self.damage_floaters
+            enemy.cur_floater = None
+            enemy.death_floaters = self.death_floaters
+            enemy.floater_randpos_x = random.randint(-16, 16)
+            enemy.floater_randpos_y = random.randint(-16, 16)
             enemy.ignite = 0
             enemy.ignite_timer = 0
             enemy.fire_weakness = 1
             enemy.invincible = False
+            enemy.poisoned = None
             for item in self.skeletons_lich_shield:
                 enemy.append_texture(item)
-            self.enemy_list.append(enemy)
+            globalvars.enemy_list.append(enemy)
         elif enemy_name == "skeletonlord":
             enemy = gamedata.Skeleton_Lord("images/TD/entities/skeletons/skeleton_lord.png")
             enemy.append_texture(arcade.load_texture("images/TD/entities/skeletons/skeleton_lord_gate.png"))
@@ -1874,14 +2087,17 @@ class MyApplication(arcade.Window):
             enemy.set_speed = 1
             enemy.health = 100000
             enemy.center_x = 48
-            enemy.worth = 2500
+            enemy.worth = globalvars.dv_worth_skeletonlord[globalvars.difficulty]
             enemy.center_y = (self.doorpos * self.tilesize) - self.tilesize_half
             enemy.ng_x = self.node_graph_x
             enemy.ng_y = self.node_graph_y
             enemy.node_tracker = 1
             enemy.ticks_until_tile = 0
             enemy.node_direction = self.node_direction
-            enemy.damage_floaters = self.damage_floaters
+            enemy.cur_floater = None
+            enemy.death_floaters = self.death_floaters
+            enemy.floater_randpos_x = random.randint(-16, 16)
+            enemy.floater_randpos_y = random.randint(-16, 16)
             enemy.ignite = 0
             enemy.ignite_timer = 0
             enemy.fire_weakness = 1
@@ -1890,10 +2106,11 @@ class MyApplication(arcade.Window):
             enemy.old_health = enemy.health
             enemy.curtime = 0
             enemy.anim_timer = 0
-            self.enemy_list.append(enemy)
+            enemy.poisoned = None
+            globalvars.enemy_list.append(enemy)
 
     def update(self, delta_time):
-        if self.game_started:
+        if self.game_started and not self.paused:
             if globalvars.population <= 0 and not self.lose_switch:
                 globalvars.emit_sound("lose.ogg")
                 self.lose_switch = True
@@ -1907,7 +2124,7 @@ class MyApplication(arcade.Window):
                 self.player.mana = self.player.mana_cap
 
             if globalvars.population > 0 or self.win:
-                self.enemy_list.update()
+                globalvars.enemy_list.update()
                 self.bullet_list.update()
                 self.player.update()
 
@@ -1922,7 +2139,7 @@ class MyApplication(arcade.Window):
                 # If all the enemies are dead at the end of the wave have an intermission and set up next wave.
                 if len(self.enemy_queue) <= 0:
                     local_count = 0
-                    for enemies in self.enemy_list:
+                    for enemies in globalvars.enemy_list:
                         local_count += 1
                     if local_count <= 0:
                         self.countdown_logic += 1
@@ -1935,8 +2152,17 @@ class MyApplication(arcade.Window):
                             globalvars.stats_waves += 1
 
                             if self.player.player_has_skill("Necromancy"):
-                                if globalvars.population < globalvars.max_population:
-                                    globalvars.population += 1
+                                add_pop = 1
+
+                                if self.player.player_has_skill("Vitality"):
+                                    add_pop = 2
+
+                                if globalvars.population + add_pop > globalvars.max_population:
+                                    add_pop = globalvars.max_population - globalvars.population
+
+                                globalvars.population += add_pop
+
+
 
                             self.on_wave_change(self.wave)
                 else:   # Else, spawn the enemies in the queue.
@@ -2021,7 +2247,7 @@ class MyApplication(arcade.Window):
             if selected_tower == 6:
                 tower = gamedata.Tower_Industrial_Super_Base("images/TD/entities/towers/industrial/tank_base.png")
                 tower.curtime = 0
-                tower.enemy_list = self.enemy_list
+                tower.enemy_list = globalvars.enemy_list
                 tower.bullet_list = self.bullet_list
                 tower.attack_radius = self.tower_data[selected_tower].attack_radius
                 tower.damage = self.tower_data[selected_tower].damage
@@ -2031,6 +2257,7 @@ class MyApplication(arcade.Window):
                 tower.animation_wait = 0
                 tower.center_x = self.current_mouse_x
                 tower.center_y = self.current_mouse_y
+                tower.detect_delay = 0
                 self.bullet_list.append(tower)
                 tower = gamedata.Tower_Industrial_Super("images/TD/entities/towers/industrial/tank_gun.png")
 
@@ -2046,12 +2273,13 @@ class MyApplication(arcade.Window):
         tower.uses = 0
         tower.center_x = self.current_mouse_x
         tower.center_y = self.current_mouse_y
-        tower.enemy_list = self.enemy_list
+        tower.enemy_list = globalvars.enemy_list
         tower.bullet_list = self.bullet_list
         tower.x_origin = self.current_mouse_x
         tower.y_origin = self.current_mouse_y
         tower.ng_x = self.node_graph_x
         tower.ng_y = self.node_graph_y
+        tower.detect_delay = 0
         for i in range (len(self.tower_data[selected_tower].anims)):
             tower.append_texture(self.tower_data[selected_tower].anims[i])
 
@@ -2060,10 +2288,180 @@ class MyApplication(arcade.Window):
 
     # Wave data
     def on_wave_change(self, wave):
+        if globalvars.difficulty == 0:
+            self.normal_wave_event(wave)
+        elif globalvars.difficulty == 1:
+            self.hard_wave_event(wave)
+        elif globalvars.difficulty == 2:
+            self.nightmare_wave_event(wave)
+        else:
+            print("What?")
+
+    def normal_wave_event(self, wave):
         # Define what each wave should spawn.
         if wave == 1:
             self.enemy_delay = 150
+            for unused in range(5):
+                self.enemy_queue.append("skeleton")
+        elif wave == 2:
+            self.enemy_delay = 125
             for unused in range(10):
+                self.enemy_queue.append("skeleton")
+        elif wave == 3:
+            self.enemy_delay = 100
+            for unused in range(15):
+                self.enemy_queue.append("skeleton")
+        elif wave == 4:
+            self.enemy_delay = 75
+            for unused in range(20):
+                self.enemy_queue.append("skeleton")
+        elif wave == 5:
+            self.enemy_delay = 50
+            for unused in range(25):
+                self.enemy_queue.append("skeleton")
+            self.enemy_queue.append("armored_skeleton")
+        elif wave == 6:
+            self.enemy_delay = 30
+            for unused in range(5):
+                self.enemy_queue.append("armored_skeleton")
+            for unused in range(30):
+                self.enemy_queue.append("skeleton")
+        elif wave == 7:
+            for unused in range(5):
+                self.enemy_queue.append("armored_skeleton")
+            for unused in range(15):
+                self.enemy_queue.append("skeleton")
+            for unused in range(5):
+                self.enemy_queue.append("armored_skeleton")
+            for unused in range(15):
+                self.enemy_queue.append("skeleton")
+        elif wave == 8:
+            for unused in range(25):
+                self.enemy_queue.append("skeleton")
+            for unused in range(25):
+                self.enemy_queue.append("armored_skeleton")
+        elif wave == 9:
+            self.enemy_delay = 10
+            self.enemy_queue.append("armored_skeleton")
+            for unused in range(25):
+                self.enemy_queue.append("skeleton")
+            self.enemy_queue.append("armored_skeleton")
+        elif wave == 10:
+            self.enemy_delay = 30
+            for unused in range(25):
+                self.enemy_queue.append("skeleton")
+                self.enemy_queue.append("armored_skeleton")
+            self.enemy_queue.append("hyperskeleton")
+        elif wave == 11:
+            self.enemy_delay = 25
+            self.enemy_queue.append("skeleton")
+            self.enemy_queue.append("hyperskeleton")
+            for unused in range(15):
+                self.enemy_queue.append("armored_skeleton")
+            for unused in range(3):
+                self.enemy_queue.append("hyperskeleton")
+            for unused in range(20):
+                self.enemy_queue.append("armored_skeleton")
+                self.enemy_queue.append("skeleton")
+            self.enemy_queue.append("hyperskeleton")
+        elif wave == 12:
+            for unused in range(60):
+                self.enemy_queue.append("armored_skeleton")
+            for unused in range(5):
+                self.enemy_queue.append("hyperskeleton")
+        elif wave == 13:
+            for unused in range(5):
+                self.enemy_queue.append("hyperskeleton")
+            for unused in range(30):
+                self.enemy_queue.append("skeleton")
+            self.enemy_queue.append("hyperskeleton")
+            for unused in range(10):
+                self.enemy_queue.append("skeleton")
+                self.enemy_queue.append("armored_skeleton")
+        elif wave == 14:
+            for unused in range(40):
+                self.enemy_queue.append("hyperskeleton")
+                self.enemy_queue.append("armored_skeleton")
+        elif wave == 15:
+            self.enemy_delay = 5
+            for unused in range(5):
+                self.enemy_queue.append("hyperskeleton")
+            self.enemy_queue.append("raptor")
+        elif wave == 16:
+            self.enemy_delay = 20
+            for unused in range(3):
+                self.enemy_queue.append("raptor")
+            for unused in range(20):
+                self.enemy_queue.append("skeleton")
+                self.enemy_queue.append("armored_skeleton")
+            for unused in range(20):
+                self.enemy_queue.append("hyperskeleton")
+                self.enemy_queue.append("skeleton")
+        elif wave == 17:
+            for unused in range(15):
+                self.enemy_queue.append("skeleton")
+                self.enemy_queue.append("armored_skeleton")
+                self.enemy_queue.append("hyperskeleton")
+                self.enemy_queue.append("raptor")
+        elif wave == 18:
+            for unused in range(30):
+                self.enemy_queue.append("raptor")
+                self.enemy_queue.append("hyperskeleton")
+        elif wave == 19:
+            for unused in range(50):
+                self.enemy_queue.append("raptor")
+        elif wave == 20:
+            self.enemy_delay = 20
+            for unused in range(10):
+                self.enemy_queue.append("armored_skeleton")
+            for unused in range(50):
+                self.enemy_queue.append("raptor")
+            for unused in range(10):
+                self.enemy_queue.append("skeleton")
+            self.enemy_queue.append("lich")
+        elif wave > 20:     # Past wave 20 it goes into automatic mode
+            self.enemy_delay = 20 - ((wave - 20) * 2)  # Decrease by two each wave
+            if self.enemy_delay < 2:
+                self.enemy_delay = 2
+            enemies_to_spawn = round(wave ** 1.25)
+            # Each automatic wave spawns 12 "blocks" of enemies with gradually increasing size
+            blocks = 12
+            block_size = round((wave / 10) ** 1.5)
+            local_enemies = ["skeleton", "armored_skeleton", "hyperskeleton", "raptor"]
+            while enemies_to_spawn > len(self.enemy_queue):
+                for block in range(blocks):
+                    if random.randint(1, 4) == 2:
+                        for unused in range(block_size):
+                            self.enemy_queue.append(random.choice(local_enemies))
+                    else:
+                        local_chosen_enemy = "hyperskeleton"
+                        math_temp = random.randint(1, wave - 18)
+                        if math_temp == 1:
+                            local_chosen_enemy = "armored_skeleton"
+                        elif math_temp == 2:
+                            local_chosen_enemy = "skeleton"
+
+                        math_temp = 30 - wave
+                        if math_temp < 1:
+                            math_temp = 1
+                        if random.randint(1, math_temp) == 1:
+                            local_chosen_enemy = "raptor"
+
+                        math_temp = round(1000 - (wave ** 1.85))
+                        if math_temp < 1:
+                            math_temp = 1
+                        if random.randint(1, math_temp) == 1:
+                            local_chosen_enemy = "lich"
+                            block_size = 1
+
+                        for unused in range(block_size):
+                            self.enemy_queue.append(local_chosen_enemy)
+
+    def hard_wave_event(self, wave):
+        # Define what each wave should spawn.
+        if wave == 1:
+            self.enemy_delay = 150
+            for unused in range(11):
                 self.enemy_queue.append("skeleton")
         elif wave == 2:
             self.enemy_delay = 100
@@ -2222,6 +2620,254 @@ class MyApplication(arcade.Window):
                         math_temp = 1
                     if random.randint(1, math_temp) == 1:
                         self.enemy_queue.append("lich")
+
+            # Skeleton lord spawning
+            if wave > 25:
+                amount = 1
+                if wave > 30:
+                    amount = amount + (wave - 30)
+
+                chance = (wave - 25) * (1 - (25 - wave))
+                if chance >= 100:
+                    chance = 100
+
+                if random.randint(chance, 100) == 100:
+                    for i in range(amount):
+                        self.enemy_queue.append("skeletonlord")
+
+    def nightmare_wave_event(self, wave):
+        # Define what each wave should spawn.
+        if wave == 1:
+            self.enemy_delay = 150
+            for unused in range(11):
+                self.enemy_queue.append("skeleton")
+        elif wave == 2:
+            self.enemy_delay = 100
+
+            self.enemy_queue.append("armored_skeleton")
+
+            for unused in range(5):
+                self.enemy_queue.append("skeleton")
+
+            self.enemy_queue.append("armored_skeleton")
+
+            for unused in range(5):
+                self.enemy_queue.append("skeleton")
+
+            self.enemy_queue.append("armored_skeleton")
+
+            for unused in range(5):
+                self.enemy_queue.append("skeleton")
+        elif wave == 3:
+            self.enemy_delay = 30
+
+            for unused in range(5):
+                self.enemy_queue.append("armored_skeleton")
+
+            for unused in range(20):
+                self.enemy_queue.append("skeleton")
+
+            self.enemy_queue.append("hyperskeleton")
+        elif wave == 4:
+            for unused in range(3):
+                self.enemy_queue.append("hyperskeleton")
+
+            for unused in range(5):
+                self.enemy_queue.append("skeleton")
+                self.enemy_queue.append("armored_skeleton")
+
+            self.enemy_queue.append("hyperskeleton")
+            for unused in range(5):
+                self.enemy_queue.append("skeleton")
+                self.enemy_queue.append("armored_skeleton")
+
+            self.enemy_queue.append("hyperskeleton")
+            for unused in range(5):
+                self.enemy_queue.append("skeleton")
+                self.enemy_queue.append("armored_skeleton")
+
+            self.enemy_queue.append("hyperskeleton")
+        elif wave == 5:
+            self.enemy_delay = 15
+
+            for unused in range(25):
+                self.enemy_queue.append("skeleton")
+                self.enemy_queue.append("hyperskeleton")
+
+            for unused in range(10):
+                self.enemy_queue.append("armored_skeleton")
+
+            self.enemy_queue.append("raptor")
+        elif wave == 6:
+
+            self.enemy_queue.append("raptor")
+
+            for unused in range(10):
+                self.enemy_queue.append("hyperskeleton")
+
+            for unused in range(20):
+                self.enemy_queue.append("skeleton")
+                self.enemy_queue.append("armored_skeleton")
+
+            for unused in range(10):
+                self.enemy_queue.append("hyperskeleton")
+
+            self.enemy_queue.append("raptor")
+        elif wave == 7:
+            for unused in range(3):
+                self.enemy_queue.append("raptor")
+
+            for unused in range(15):
+                self.enemy_queue.append("armored_skeleton")
+
+            for unused in range(15):
+                self.enemy_queue.append("skeleton")
+
+            for unused in range(15):
+                self.enemy_queue.append("hyperskeleton")
+
+            for unused in range(15):
+                self.enemy_queue.append("skeleton")
+
+            for unused in range(15):
+                self.enemy_queue.append("armored_skeleton")
+
+            for unused in range(3):
+                self.enemy_queue.append("raptor")
+        elif wave == 8:
+            for unused in range(50):
+                self.enemy_queue.append("armored_skeleton")
+                self.enemy_queue.append("skeleton")
+
+            for unused in range(10):
+                self.enemy_queue.append("raptor")
+        elif wave == 9:
+            self.enemy_delay = 1
+
+            for unused in range(100):
+                self.enemy_queue.append("hyperskeleton")
+        elif wave == 10:
+            for unused in range(30):
+                self.enemy_queue.append("skeleton")
+                self.enemy_queue.append("armored_skeleton")
+                self.enemy_queue.append("raptor")
+                self.enemy_queue.append("hyperskeleton")
+
+            self.enemy_queue.append("lich")
+        elif wave == 11:
+            self.enemy_delay = 5
+
+            self.enemy_queue.append("lich")
+
+            for unused in range(25):
+                self.enemy_queue.append("hyperskeleton")
+
+            for unused in range(15):
+                self.enemy_queue.append("armored_skeleton")
+                self.enemy_queue.append("raptor")
+
+            for unused in range(25):
+                self.enemy_queue.append("hyperskeleton")
+
+            for unused in range(20):
+                self.enemy_queue.append("hyperskeleton")
+
+            for unused in range(5):
+                self.enemy_queue.append("armored_skeleton")
+                self.enemy_queue.append("skeleton")
+                self.enemy_queue.append("raptor")
+
+            for unused in range(25):
+                self.enemy_queue.append("hyperskeleton")
+
+            self.enemy_queue.append("lich")
+        elif wave == 12:
+            self.enemy_delay = 1
+
+            self.enemy_queue.append("lich")
+            for unused in range(200):
+                self.enemy_queue.append("armored_skeleton")
+            self.enemy_queue.append("lich")
+        elif wave == 13:
+            self.enemy_delay = 100
+
+            for unused in range(5):
+                self.enemy_queue.append("lich")
+        elif wave == 14:
+            self.enemy_delay = 5
+
+            for unused in range(50):
+                self.enemy_queue.append("hyperskeleton")
+                self.enemy_queue.append("raptor")
+                self.enemy_queue.append("hyperskeleton")
+
+            for unused in range(5):
+                self.enemy_queue.append("armored_skeleton")
+                self.enemy_queue.append("lich")
+                self.enemy_queue.append("skeleton")
+        elif wave == 15:
+            self.enemy_delay = 1
+
+            for unused in range(50):
+                self.enemy_queue.append("raptor")
+        elif wave == 16:
+            self.enemy_delay = 20
+
+            for unused in range(10):
+                self.enemy_queue.append("lich")
+        elif wave == 17:
+            self.enemy_delay = 15
+
+            for unused in range(15):
+                self.enemy_queue.append("raptor")
+                self.enemy_queue.append("lich")
+        elif wave == 18:
+            self.enemy_delay = 10
+
+            for unused in range(20):
+                self.enemy_queue.append("hyperskeleton")
+                self.enemy_queue.append("raptor")
+                self.enemy_queue.append("armored_skeleton")
+                self.enemy_queue.append("lich")
+        elif wave == 19:
+            self.enemy_delay = 5
+
+            for unused in range(200):
+                self.enemy_queue.append("armored_skeleton")
+
+            for unused in range(100):
+                self.enemy_queue.append("raptor")
+
+            for unused in range(25):
+                self.enemy_queue.append("lich")
+        elif wave == 20:
+            self.enemy_delay = 1
+
+            for unused in range(100):
+                self.enemy_queue.append("raptor")
+                self.enemy_queue.append("lich")
+                self.enemy_queue.append("hyperskeleton")
+
+            self.enemy_queue.append("skeletonlord")
+        elif wave > 20:     # Past wave 20 it goes into automatic mode
+            self.enemy_delay = 1
+
+            enemies_to_spawn = round(wave ** 3)
+            # Each automatic wave spawns 16 "blocks" of enemies with gradually increasing size
+            blocks = 16
+            block_size = round((wave / 10) ** 5)
+            local_enemies = ["armored_skeleton", "hyperskeleton", "raptor", "lich"]
+            while enemies_to_spawn > len(self.enemy_queue):
+                for block in range(blocks):
+                    for unused in range(block_size):
+                        self.enemy_queue.append(random.choice(local_enemies))
+
+                    # Additional lich spawning
+                    math_temp = 30 - wave
+                    if math_temp < 1:
+                        math_temp = 1
+                    if random.randint(1, math_temp) == 1:
+                        self.enemy_queue.append("skeletonlord")
 
             # Skeleton lord spawning
             if wave > 25:
