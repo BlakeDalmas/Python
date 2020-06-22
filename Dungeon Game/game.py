@@ -54,6 +54,14 @@ class Fireball(arcade.Sprite):
         self.center_y += self.change_y
         self.angle += 20
 
+class Chest(arcade.Sprite):
+    def is_open(self):
+        get_texture = getattr(self, "get_texture", None)
+        if get_texture is None:
+            return self.texture == self.textures[0]
+        else:
+            return get_texture() == 0
+        
 
 class Enemy(arcade.Sprite):
     def _init_(self):
@@ -337,7 +345,7 @@ class MyApplication(arcade.Window):
 
                     # Randomly place chests
                     if random.randint(1, 50) == 5:
-                        chest = arcade.Sprite("images/chest_closed.png", .75)
+                        chest = Chest("images/chest_closed.png", .75)
                         chest.center_x = x * 32
                         chest.center_y = y * 32
                         chest.append_texture(self.chest_texture)
@@ -600,7 +608,7 @@ class MyApplication(arcade.Window):
 
     def open_chest(self, chest):
         # If chest isn't already opened, open it and spawn random item.
-        if chest.get_texture() == 0:
+        if chest.is_open():
             arcade.play_sound(self.sound_list[12])
             chest.set_texture(1)
             chance = random.randint(1, 2)
@@ -694,7 +702,7 @@ class MyApplication(arcade.Window):
             # If it hits a chest open the chest and destroy the projectile
             chest_check = arcade.check_for_collision_with_list(fireball, self.chest_list)
             for chest in chest_check:
-                if chest.get_texture() == 0:
+                if chest.is_open():
                     fireball.kill()
                     self.open_chest(chest)
 
@@ -738,7 +746,7 @@ class MyApplication(arcade.Window):
             # When arrow hits chest open it and remove projectile
             chest_check = arcade.check_for_collision_with_list(arrow, self.chest_list)
             for chest in chest_check:
-                if chest.get_texture() == 0:
+                if chest.is_open():
                     self.open_chest(chest)
                     arrow.kill()
 
